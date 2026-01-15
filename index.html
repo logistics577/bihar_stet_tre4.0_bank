@@ -1,1086 +1,1696 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Knowledge Library</title>
-<style>
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Knowledge Library</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-body {
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-min-height: 100vh;
-padding: 10px; /* Reduced padding for mobile */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px; /* Reduced padding for mobile */
+            overflow-x: hidden;
         }
-.container {
-max-width: 1400px;
-margin: 0 auto;
-background: white;
-border-radius: 15px;
-box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-overflow: hidden;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
         }
-.navbar {
-display: flex;
-background: #2c3e50;
-flex-wrap: wrap;
+        .navbar {
+            display: flex;
+            background: #2c3e50;
+            flex-wrap: wrap;
         }
-.nav-btn {
-flex: 1;
-min-width: 100px; /* Smaller min-width for better mobile fit */
-padding: 15px 10px; /* Reduced padding */
-border: none;
-background: #2c3e50;
-color: white;
-font-size: 14px; /* Smaller font on default */
-cursor: pointer;
-transition: all 0.3s;
-border-bottom: 3px solid transparent;
-text-align: center;
-white-space: nowrap;
+        .nav-btn {
+            flex: 1;
+            min-width: 100px; /* Smaller min-width for better mobile fit */
+            padding: 15px 10px; /* Reduced padding */
+            border: none;
+            background: #2c3e50;
+            color: white;
+            font-size: 14px; /* Smaller font on default */
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            text-align: center;
+            white-space: nowrap;
         }
-.nav-btn:hover {
-background: #34495e;
+        .nav-btn:hover {
+            background: #34495e;
         }
-.nav-btn.active {
-background: #3498db;
-border-bottom: 3px solid #2980b9;
+        .nav-btn.active {
+            background: #3498db;
+            border-bottom: 3px solid #2980b9;
         }
-.content {
-padding: 20px; /* Reduced for mobile */
+        .content {
+            padding: 20px; /* Reduced for mobile */
         }
-.section {
-display: none;
+        .section {
+            display: none;
         }
-.section.active {
-display: block;
-animation: fadeIn 0.5s;
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s;
         }
-@keyframes fadeIn {
+        @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-h1 {
-color: #2c3e50;
-margin-bottom: 20px;
-font-size: 24px; /* Smaller default */
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px; /* Smaller default */
         }
-.upload-form {
-background: #f8f9fa;
-padding: 20px; /* Reduced */
-border-radius: 10px;
-margin-bottom: 20px;
+        .upload-form {
+            background: #f8f9fa;
+            padding: 20px; /* Reduced */
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
-.form-group {
-margin-bottom: 15px; /* Reduced */
+        .form-group {
+            margin-bottom: 15px; /* Reduced */
         }
-label {
-display: block;
-margin-bottom: 8px;
-color: #555;
-font-weight: 600;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
         }
-input[type="email"],
-input[type="file"],
-input[type="text"],
-input[type="url"],
-textarea {
-width: 100%;
-padding: 12px;
-border: 2px solid #ddd;
-border-radius: 8px;
-font-size: 14px;
-transition: border 0.3s;
-font-family: inherit;
+        input[type="email"],
+        input[type="file"],
+        input[type="text"],
+        input[type="url"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.3s;
+            font-family: inherit;
         }
-textarea {
-min-height: 150px;
-resize: vertical;
+        textarea {
+            min-height: 150px;
+            resize: vertical;
         }
-input:focus,
-textarea:focus {
-outline: none;
-border-color: #3498db;
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
         }
-.btn {
-background: #3498db;
-color: white;
-padding: 10px 20px; /* Slightly reduced */
-border: none;
-border-radius: 8px;
-cursor: pointer;
-font-size: 14px; /* Smaller */
-transition: all 0.3s;
-margin-right: 10px;
-margin-bottom: 10px;
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px; /* Slightly reduced */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px; /* Smaller */
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
-.btn:hover {
-background: #2980b9;
-transform: translateY(-2px);
-box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
-.btn:disabled {
-background: #95a5a6;
-cursor: not-allowed;
-transform: none;
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
         }
-.files-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Smaller cards on mobile */
-gap: 15px; /* Reduced gap */
-margin-top: 20px;
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Smaller cards on mobile */
+            gap: 15px; /* Reduced gap */
+            margin-top: 20px;
         }
-.file-card {
-background: white;
-border: 2px solid #ecf0f1;
-border-radius: 10px;
-padding: 15px; /* Reduced */
-transition: all 0.3s;
+        .file-card {
+            background: white;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            padding: 15px; /* Reduced */
+            transition: all 0.3s;
         }
-.file-card:hover {
-border-color: #3498db;
-box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-transform: translateY(-5px);
+        .file-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
         }
-.file-icon {
-font-size: 40px; /* Slightly smaller */
-text-align: center;
-margin-bottom: 10px; /* Reduced */
+        .file-icon {
+            font-size: 40px; /* Slightly smaller */
+            text-align: center;
+            margin-bottom: 10px; /* Reduced */
         }
-.file-name {
-font-weight: bold;
-color: #2c3e50;
-margin-bottom: 10px;
-word-break: break-all;
-font-size: 14px; /* Smaller */
+        .file-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            word-break: break-all;
+            font-size: 14px; /* Smaller */
         }
-.file-info {
-color: #7f8c8d;
-font-size: 12px; /* Smaller */
-margin-bottom: 5px;
+        .file-info {
+            color: #7f8c8d;
+            font-size: 12px; /* Smaller */
+            margin-bottom: 5px;
         }
-.file-actions {
-display: flex;
-gap: 5px; /* Reduced */
-margin-top: 10px; /* Reduced */
-flex-wrap: wrap;
+        .file-actions {
+            display: flex;
+            gap: 5px; /* Reduced */
+            margin-top: 10px; /* Reduced */
+            flex-wrap: wrap;
         }
-.btn-small {
-padding: 6px 10px; /* Smaller buttons */
-font-size: 11px; /* Smaller text */
-flex: 1;
-min-width: 50px; /* Smaller */
-margin: 0;
+        .btn-small {
+            padding: 6px 10px; /* Smaller buttons */
+            font-size: 11px; /* Smaller text */
+            flex: 1;
+            min-width: 50px; /* Smaller */
+            margin: 0;
         }
-.btn-view {
-background: #27ae60;
+        .btn-view {
+            background: #27ae60;
         }
-.btn-view:hover {
-background: #229954;
+        .btn-view:hover {
+            background: #229954;
         }
-.btn-update {
-background: #f39c12;
+        .btn-update {
+            background: #f39c12;
         }
-.btn-update:hover {
-background: #d68910;
+        .btn-update:hover {
+            background: #d68910;
         }
-.btn-delete {
-background: #e74c3c;
+        .btn-delete {
+            background: #e74c3c;
         }
-.btn-delete:hover {
-background: #c0392b;
+        .btn-delete:hover {
+            background: #c0392b;
         }
-.alert {
-padding: 12px; /* Reduced */
-border-radius: 8px;
-margin-bottom: 15px; /* Reduced */
-animation: slideIn 0.3s;
+        .alert {
+            padding: 12px; /* Reduced */
+            border-radius: 8px;
+            margin-bottom: 15px; /* Reduced */
+            animation: slideIn 0.3s;
         }
-@keyframes slideIn {
+        @keyframes slideIn {
             from { transform: translateX(-100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-.alert-success {
-background: #d4edda;
-color: #155724;
-border: 1px solid #c3e6cb;
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
-.alert-error {
-background: #f8d7da;
-color: #721c24;
-border: 1px solid #f5c6cb;
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
-.modal {
-display: none;
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0,0,0,0.8);
-z-index: 1000;
-justify-content: center;
-align-items: center;
-overflow-y: auto;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
         }
-.modal.active {
-display: flex;
+        .modal.active {
+            display: flex;
         }
-.modal-content {
-background: white;
-padding: 0;
-border-radius: 0;
-max-width: 100vw;
-width: 100vw;
-max-height: 100vh;
-height: 100vh;
-overflow: hidden;
-animation: none;
-margin: 0;
-position: relative;
+        .modal-content {
+            background: white;
+            padding: 0;
+            border-radius: 0;
+            max-width: 100vw;
+            width: 100vw;
+            max-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+            animation: none;
+            margin: 0;
+            position: relative;
         }
-.modal.maximized .modal-content {
-width: 100vw;
-height: 100vh;
+        .modal.maximized .modal-content {
+            width: 100vw;
+            height: 100vh;
         }
-.modal-header {
-margin: 0;
-padding: 8px 15px; /* Reduced */
-display: flex;
-justify-content: space-between;
-align-items: center;
-background: rgba(0,0,0,0.1);
-position: sticky;
-top: 0;
-z-index: 10;
+        .modal-header {
+            margin: 0;
+            padding: 8px 15px; /* Reduced */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-.modal-header h2 {
-color: #2c3e50;
-margin: 0;
-font-size: 16px; /* Smaller */
+        .modal-header h2 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 16px; /* Smaller */
         }
-.close-btn {
-background: #95a5a6;
-margin-left: 5px; /* Reduced */
-padding: 5px 10px; /* Smaller */
-font-size: 12px; /* Smaller */
+        .close-btn {
+            background: #95a5a6;
+            margin-left: 5px; /* Reduced */
+            padding: 5px 10px; /* Smaller */
+            font-size: 12px; /* Smaller */
         }
-.close-btn:hover {
-background: #7f8c8d;
+        .close-btn:hover {
+            background: #7f8c8d;
         }
-.maximize-btn {
-background: #f39c12;
+        .maximize-btn {
+            background: #f39c12;
         }
-.maximize-btn:hover {
-background: #d68910;
+        .maximize-btn:hover {
+            background: #d68910;
         }
-.viewer-container {
-width: 100%;
-height: calc(100vh - 40px); /* Adjusted for smaller header */
-background: #f8f9fa;
-padding: 0;
-margin: 0;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: flex-start;
-overflow-y: auto;
+        .viewer-container {
+            width: 100%;
+            height: calc(100vh - 40px); /* Adjusted for smaller header */
+            background: #f8f9fa;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-y: auto;
         }
-.viewer-container img {
-max-width: 100%;
-max-height: 100%;
-border-radius: 0;
-box-shadow: none;
-cursor: zoom-in;
+        .viewer-container img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 0;
+            box-shadow: none;
+            cursor: zoom-in;
         }
-.viewer-container canvas {
-max-width: 100%;
-border: none;
-border-radius: 0;
-cursor: crosshair;
-display: block;
-margin: 0 auto 10px;
+        .viewer-container canvas {
+            max-width: 100%;
+            border: none;
+            border-radius: 0;
+            cursor: crosshair;
+            display: block;
+            margin: 0 auto 10px;
         }
-.viewer-container iframe {
-width: 100%;
-height: 100%;
-border: none;
-border-radius: 0;
+        .viewer-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 0;
         }
-.viewer-container pre {
-width: 100%;
-height: 100%;
-overflow-y: auto;
-padding: 15px; /* Reduced */
-background: white;
-margin: 0;
-white-space: pre-wrap;
-word-wrap: break-word;
-font-family: 'Courier New', monospace;
-font-size: 12px; /* Smaller text */
+        .viewer-container pre {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 15px; /* Reduced */
+            background: white;
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 12px; /* Smaller text */
         }
-.pdf-container {
-width: 100%;
-height: 100%;
-overflow-y: auto;
-padding: 5px; /* Reduced */
-box-sizing: border-box;
+        .pdf-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 5px; /* Reduced */
+            box-sizing: border-box;
         }
-.pdf-page {
-margin-bottom: 5px; /* Reduced */
-text-align: center;
+        .pdf-page {
+            margin-bottom: 5px; /* Reduced */
+            text-align: center;
         }
-.pdf-page canvas {
-max-width: 100%;
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        .pdf-page canvas {
+            max-width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-.paste-area {
-width: 100%;
-min-height: 250px; /* Slightly smaller */
-border: 3px dashed #3498db;
-border-radius: 10px;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-padding: 20px; /* Reduced */
-text-align: center;
-background: #ecf0f1;
-cursor: pointer;
-transition: all 0.3s;
+        .paste-area {
+            width: 100%;
+            min-height: 250px; /* Slightly smaller */
+            border: 3px dashed #3498db;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px; /* Reduced */
+            text-align: center;
+            background: #ecf0f1;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-.paste-area:hover {
-background: #d5dbdb;
-border-color: #2980b9;
+        .paste-area:hover {
+            background: #d5dbdb;
+            border-color: #2980b9;
         }
-.paste-area.dragover {
-background: #d4edda;
-border-color: #28a745;
+        .paste-area.dragover {
+            background: #d4edda;
+            border-color: #28a745;
         }
-.paste-icon {
-font-size: 48px; /* Smaller */
-margin-bottom: 10px; /* Reduced */
+        .paste-icon {
+            font-size: 48px; /* Smaller */
+            margin-bottom: 10px; /* Reduced */
         }
-.tools-container {
-display: flex;
-gap: 10px;
-margin-bottom: 15px; /* Reduced */
-flex-wrap: wrap;
+        .tools-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px; /* Reduced */
+            flex-wrap: wrap;
         }
-.color-picker {
-padding: 5px;
-border: 2px solid #ddd;
-border-radius: 5px;
-cursor: pointer;
+        .color-picker {
+            padding: 5px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
         }
-.brush-size {
-padding: 8px;
-border: 2px solid #ddd;
-border-radius: 5px;
+        .brush-size {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
         }
-#paste-section {
-position: relative;
-min-height: 500px;
+        #paste-section {
+            position: relative;
+            min-height: 500px;
         }
-#create-content-wrapper {
-position: relative;
-padding-bottom: 80px; /* Space for fixed buttons */
+        #create-content-wrapper {
+            position: relative;
+            padding-bottom: 80px; /* Space for fixed buttons */
         }
-.save-actions {
-position: fixed;
-bottom: 20px;
-left: 50%;
-transform: translateX(-50%);
-background: white;
-padding: 15px 30px;
-border-radius: 10px;
-box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-z-index: 100;
-display: none;
+        .save-actions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 100;
+            display: none;
         }
-.save-actions.active {
-display: flex;
-gap: 10px;
+        .save-actions.active {
+            display: flex;
+            gap: 10px;
         }
-.filename-input-wrapper {
-position: relative;
-margin-bottom: 20px;
+        .filename-input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
         }
-.filename-input-wrapper input {
-width: 100%;
+        .filename-input-wrapper input {
+            width: 100%;
         }
-.urls-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-gap: 15px;
-margin-top: 20px;
+        .urls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .url-card {
+            background: white;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+        .url-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+        .url-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        .url-link {
+            color: #7f8c8d;
+            font-size: 12px;
+            word-break: break-all;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 5px; /* Even smaller padding */
+            }
+            .content {
+                padding: 10px; /* Much smaller */
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .nav-btn {
+                font-size: 12px;
+                padding: 12px 5px;
+                min-width: 80px; /* Stack better */
+            }
+            .navbar {
+                flex-direction: column; /* Stack navbar vertically on very small screens */
+            }
+            .btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+            .btn-small {
+                padding: 5px 8px;
+                font-size: 10px;
+                min-width: 40px;
+            }
+            .file-card {
+                padding: 10px;
+            }
+            .file-icon {
+                font-size: 32px;
+            }
+            .file-name {
+                font-size: 12px;
+            }
+            .file-info {
+                font-size: 10px;
+            }
+            .modal-header {
+                padding: 5px 10px;
+            }
+            .modal-header h2 {
+                font-size: 14px;
+            }
+            .close-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+                margin-left: 3px;
+            }
+            .viewer-container {
+                height: calc(100vh - 30px);
+            }
+            .paste-area {
+                min-height: 200px;
+                padding: 15px;
+            }
+            .paste-icon {
+                font-size: 40px;
+            }
+            .tools-container {
+                gap: 5px;
+            }
+            .save-actions {
+                bottom: 10px;
+                padding: 10px 15px;
+                width: 95%;
+                left: 2.5%;
+                transform: none;
+                flex-direction: column; /* Stack buttons on mobile */
+                gap: 5px;
+            }
+            .filename-input-wrapper input {
+                margin-bottom: 5px;
+            }
+            .files-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .urls-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+        @media (max-width: 480px) {
+            .nav-btn {
+                min-width: auto;
+            }
+        }
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 10px; /* Reduced */
+            color: #7f8c8d;
+        }
+        .empty-state-icon {
+            font-size: 48px; /* Smaller */
+            margin-bottom: 15px; /* Reduced */
+            opacity: 0.5;
+        }
+        .text-editor-container {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 12px; /* Reduced */
+            margin-bottom: 15px; /* Reduced */
+        }
+        .mode-selector {
+            display: flex;
+            gap: 5px; /* Reduced */
+            margin-bottom: 15px; /* Reduced */
+            flex-wrap: wrap;
+        }
+        .mode-btn {
+            padding: 8px 12px; /* Smaller */
+            font-size: 12px; /* Smaller */
+        }
+        .mode-btn.active {
+            background: #3498db;
+            color: white;
+        }
+        .mode-btn:hover {
+            transform: translateY(-1px); /* Smaller hover effect */
+        }
+        .urls-section {
+            padding: 20px;
+        }
+        .url-input-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .url-input-form input {
+            flex: 1;
+            min-width: 200px;
+        }
+        .urls-container {
+            margin-top: 20px;
+        }
+        .extracted-urls {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .extracted-urls h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .extracted-urls ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .extracted-urls li {
+            margin-bottom: 5px;
+        }
+        .extracted-urls a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .extracted-urls a:hover {
+            text-decoration: underline;
+        }
+        /* AI Help Styles (Integrated) - Enhanced for Production */
+        /* Floating AI Help Button */
+        .ai-help-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 9999;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+        .ai-help-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        .ai-help-button.hidden {
+            display: none;
+        }
+        .ai-help-button.visible {
+            display: flex;
+        }
+        /* Main Container - Full screen on mobile */
+        .ai-container {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            display: none;
+            flex-direction: column;
+            z-index: 9998;
+            transition: all 0.3s ease;
+            animation: slideUp 0.3s ease;
+            overflow: hidden;
+        }
+        @media (min-width: 769px) {
+            .ai-container {
+                bottom: 100px;
+                right: 30px;
+                width: 450px;
+                height: 650px;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .ai-container.show {
+            display: flex;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .header {
+                border-radius: 0;
+            }
+        }
+        .header h3 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        .upload-section {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            flex-shrink: 0;
+        }
+        .upload-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .upload-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            min-width: 100px;
+        }
+        .upload-btn:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+        .upload-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        .upload-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+        /* Hide ONLY AI helper file input */
+.ai-container input[type="file"] {
+    display: none;
 }
-.url-card {
-background: white;
-border: 2px solid #ecf0f1;
-border-radius: 10px;
-padding: 15px;
-transition: all 0.3s;
-}
-.url-card:hover {
-border-color: #3498db;
-box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-transform: translateY(-5px);
-}
-.url-number {
-font-size: 18px;
-font-weight: bold;
-color: #3498db;
-margin-bottom: 10px;
-}
-.url-link {
-color: #7f8c8d;
-font-size: 12px;
-word-break: break-all;
-margin-bottom: 10px;
-}
-@media (max-width: 768px) {
-body {
-padding: 5px; /* Even smaller padding */
-            }
-.content {
-padding: 10px; /* Much smaller */
-            }
-h1 {
-font-size: 20px;
-            }
-.nav-btn {
-font-size: 12px;
-padding: 12px 5px;
-min-width: 80px; /* Stack better */
-            }
-.navbar {
-flex-direction: column; /* Stack navbar vertically on very small screens */
-            }
-.btn {
-padding: 8px 15px;
-font-size: 12px;
-            }
-.btn-small {
-padding: 5px 8px;
-font-size: 10px;
-min-width: 40px;
-            }
-.file-card {
-padding: 10px;
-            }
-.file-icon {
-font-size: 32px;
-            }
-.file-name {
-font-size: 12px;
-            }
-.file-info {
-font-size: 10px;
-            }
-.modal-header {
-padding: 5px 10px;
-            }
-.modal-header h2 {
-font-size: 14px;
-            }
-.close-btn {
-padding: 4px 8px;
-font-size: 10px;
-margin-left: 3px;
-            }
-.viewer-container {
-height: calc(100vh - 30px);
-            }
-.paste-area {
-min-height: 200px;
-padding: 15px;
-            }
-.paste-icon {
-font-size: 40px;
-            }
-.tools-container {
-gap: 5px;
-            }
-.save-actions {
-bottom: 10px;
-padding: 10px 15px;
-width: 95%;
-left: 2.5%;
-transform: none;
-flex-direction: column; /* Stack buttons on mobile */
-gap: 5px;
-            }
-.filename-input-wrapper input {
-margin-bottom: 5px;
-            }
-.files-grid {
-grid-template-columns: 1fr;
-gap: 10px;
-            }
-.urls-grid {
-grid-template-columns: 1fr;
-gap: 10px;
-}
+
+        .file-info {
+            padding: 8px;
+            background: #d4edda;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #155724;
+            display: none;
+            align-items: center;
+            gap: 5px;
         }
-@media (max-width: 480px) {
-.nav-btn {
-min-width: auto;
+        .file-info.show {
+            display: flex;
+        }
+        /* Screen Capture Modal - Enhanced */
+        .capture-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            z-index: 10000;
+        }
+        .capture-modal.show {
+            display: block;
+        }
+        .capture-area {
+            position: absolute;
+            border: 2px dashed #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            cursor: crosshair;
+            display: none;
+        }
+        .capture-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        @media (max-width: 768px) {
+            .capture-controls {
+                bottom: 10px;
+                width: 95%;
+                left: 2.5%;
+                transform: none;
+                gap: 10px;
             }
         }
-.loading {
-text-align: center;
-padding: 30px;
-color: #7f8c8d;
+        /* Chat Section - GPT-like smooth scroll */
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-.empty-state {
-text-align: center;
-padding: 40px 10px; /* Reduced */
-color: #7f8c8d;
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #fff;
+            scroll-behavior: smooth; /* Smooth scrolling like GPT playground */
+            -webkit-overflow-scrolling: touch; /* Smooth on iOS */
         }
-.empty-state-icon {
-font-size: 48px; /* Smaller */
-margin-bottom: 15px; /* Reduced */
-opacity: 0.5;
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            animation: fadeInMessage 0.3s ease;
         }
-.text-editor-container {
-background: white;
-border: 2px solid #ddd;
-border-radius: 8px;
-padding: 12px; /* Reduced */
-margin-bottom: 15px; /* Reduced */
+        @keyframes fadeInMessage {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-.mode-selector {
-display: flex;
-gap: 5px; /* Reduced */
-margin-bottom: 15px; /* Reduced */
-flex-wrap: wrap;
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
         }
-.mode-btn {
-padding: 8px 12px; /* Smaller */
-font-size: 12px; /* Smaller */
+        .user-avatar {
+            background: #667eea;
+        }
+        .bot-avatar {
+            background: #28a745;
+        }
+        .message-content {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        /* Markdown Styles - Enhanced */
+        .message-content h1 {
+            font-size: 1.5em;
+            margin: 10px 0;
+            color: #333;
+        }
+        .message-content h2 {
+            font-size: 1.3em;
+            margin: 8px 0;
+            color: #444;
+        }
+        .message-content h3 {
+            font-size: 1.1em;
+            margin: 6px 0;
+            color: #555;
+        }
+        .message-content strong,
+        .message-content b {
+            font-weight: bold;
+            color: #222;
+        }
+        .message-content em,
+        .message-content i {
+            font-style: italic;
+        }
+        .message-content code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .message-content pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .message-content ul,
+        .message-content ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        .message-content li {
+            margin: 4px 0;
+        }
+        .message-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin: 10px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .message.user .message-content {
+            background: #e7f3ff;
+            margin-left: auto;
+            text-align: right;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        /* Input Section - Enhanced */
+        .input-section {
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            border-radius: 0 0 20px 20px;
+            flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+            .input-section {
+                border-radius: 0;
             }
-.mode-btn.active {
-background: #3498db;
-color: white;
         }
-.mode-btn:hover {
-transform: translateY(-1px); /* Smaller hover effect */
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
         }
-.urls-section {
-padding: 20px;
+        #queryInput {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+        #queryInput:focus {
+            border-color: #667eea;
+        }
+        .send-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .send-btn:hover {
+            background: #5568d3;
+        }
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .mic-btn, .speaker-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 50%;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .mic-btn:hover, .speaker-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+        .mic-btn.recording {
+            background: #dc3545;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        /* Canvas for screenshot */
+        #screenshotCanvas {
+            display: none;
+        }
+        /* Mobile Responsive for AI - Full screen */
+        @media (max-width: 768px) {
+            .ai-container {
+                width: 100vw;
+                height: 100vh;
+                bottom: 0;
+                right: 0;
+                border-radius: 0;
+                max-width: 100%;
+                max-height: 100%;
+            }
+            .ai-help-button {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            .upload-options {
+                gap: 5px;
+            }
+            .upload-btn {
+                min-width: auto;
+                flex: 1 1 45%;
+            }
+            .input-wrapper {
+                gap: 5px;
+            }
+            #queryInput {
+                min-width: auto;
+                flex: 1 1 100%;
+            }
+            .send-btn, .mic-btn, .speaker-btn {
+                flex-shrink: 0;
+            }
+            .file-name-preview {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #2c3e50;
+    background: #ecf0f1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    word-break: break-all;
 }
-.url-input-form {
-background: #f8f9fa;
-padding: 20px;
-border-radius: 10px;
-margin-bottom: 20px;
-display: flex;
-gap: 10px;
-flex-wrap: wrap;
-}
-.url-input-form input {
-flex: 1;
-min-width: 200px;
-}
-.urls-container {
-margin-top: 20px;
-}
-.extracted-urls {
-margin-top: 20px;
-padding: 15px;
-background: #f8f9fa;
-border-radius: 8px;
-}
-.extracted-urls h4 {
-margin-bottom: 10px;
-color: #2c3e50;
-}
-.extracted-urls ol {
-margin: 10px 0;
-padding-left: 20px;
-}
-.extracted-urls li {
-margin-bottom: 5px;
-}
-.extracted-urls a {
-color: #3498db;
-text-decoration: none;
-}
-.extracted-urls a:hover {
-text-decoration: underline;
-}
-</style>
+
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-<div class="navbar">
-<button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
-<button class="nav-btn" onclick="showSection('upload')">📤 Upload Data</button>
-<button class="nav-btn" onclick="showSection('paste')">📋 Paste & Create</button>
-<button class="nav-btn" onclick="showSection('view')">📁 View All Files</button>
-<button class="nav-btn" onclick="showSection('urls')">🔗 Saved URLs</button>
-<button class="nav-btn" onclick="window.location.href='images'">
-  🔗 Images to PDF
-</button>
-
-
-
-</div>
-<div class="content">
-<!-- Home Section -->
-<div id="home" class="section active">
-<h1>Welcome to File Manager System</h1>
-<p style="color: #7f8c8d; font-size: 14px; line-height: 1.6;">
+    <div class="container">
+        <div class="navbar">
+            <button class="nav-btn active" onclick="showSection('home', event)">🏠 Home</button>
+            <button class="nav-btn" onclick="showSection('upload', event)">📤 Upload Data</button>
+            <button class="nav-btn" onclick="showSection('paste', event)">📋 Paste & Create</button>
+            <button class="nav-btn" onclick="showSection('view', event)">📁 View All Files</button>
+            <button class="nav-btn" onclick="showSection('urls', event)">🔗 Saved URLs</button>
+            <button class="nav-btn" onclick="window.location.href='images'">
+                🔗 Images to PDF
+            </button>
+        </div>
+        <div class="content">
+            <!-- Home Section -->
+            <div id="home" class="section active">
+                <h1>Welcome to File Manager System</h1>
+                <p style="color: #7f8c8d; font-size: 14px; line-height: 1.6;">
                     Advanced file management system with screenshot support, text extraction, and drawing capabilities.
-</p>
-<div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px;">
-<h3 style="color: #27ae60; margin-bottom: 10px; font-size: 16px;">📋 Features:</h3>
-<ul style="color: #555; line-height: 1.8; font-size: 14px;">
-<li>✅ Upload any file type (PDF, PNG, Images, Documents)</li>
-<li>✅ View files directly in browser (full screen)</li>
-<li>✅ Paste screenshots directly from clipboard</li>
-<li>✅ Create and save text documents</li>
-<li>✅ Admin-only update/delete</li>
-<li>✅ Fully responsive design</li>
-<li>✅ Extract and list URLs from text documents with numbering</li>
-<li>✅ Save and manage URLs separately</li>
-</ul>
-</div>
-</div>
-<!-- Upload Section -->
-<div id="upload" class="section">
-<h1>Upload New File</h1>
-<div id="uploadAlert"></div>
-<div class="upload-form">
-<form id="uploadForm">
-<div class="form-group">
-<label for="uploadFile">Select File *</label>
-<input type="file" id="uploadFile" required>
-</div>
-<button type="submit" class="btn">📤 Upload File</button>
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px;">
+                    <h3 style="color: #27ae60; margin-bottom: 10px; font-size: 16px;">📋 Features:</h3>
+                    <ul style="color: #555; line-height: 1.8; font-size: 14px;">
+                        <li>✅ Upload any file type (PDF, PNG, Images, Documents)</li>
+                        <li>✅ View files directly in browser (full screen)</li>
+                        <li>✅ Paste screenshots directly from clipboard</li>
+                        <li>✅ Create and save text documents</li>
+                        <li>✅ Admin-only update/delete</li>
+                        <li>✅ Fully responsive design</li>
+                        <li>✅ Extract and list URLs from text documents with numbering</li>
+                        <li>✅ Save and manage URLs separately</li>
+                        <li>✅ AI Assistant in viewer for screenshots and Q&A</li>
+                        <li>✅ Speech-to-Text and Text-to-Speech like Google</li>
+                        <li>✅ Auto full-page screenshot on mobile after 5s</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Upload Section -->
+            <div id="upload" class="section">
+                <h1>Upload New File</h1>
+                <div id="uploadAlert"></div>
+                <div class="upload-form">
+                    <form id="uploadForm">
+                        <form id="uploadForm">
+    <!-- Select file button -->
+    <label for="uploadFile" class="btn select-btn" id="selectBtn">
+        📤 Select File
+    </label>
+
+    <!-- Hidden native input -->
+    <input type="file" id="uploadFile" required hidden>
+
+    <!-- File name preview -->
+    <div id="selectedFileName" class="file-name-preview" style="display:none;"></div>
+
+    <!-- Upload button -->
+    <button type="submit" class="btn">📤 Upload File</button>
 </form>
-</div>
-</div>
-<!-- Paste & Create Section -->
-<div id="paste" class="section" id="paste-section">
-<h1>Paste Screenshot or Create Content</h1>
-<div id="pasteAlert"></div>
-<div class="mode-selector">
-<button class="mode-btn active" onclick="setMode('paste')">📸 Paste Screenshot</button>
-<!-- <button class="mode-btn" onclick="setMode('draw')">✏️ Draw</button> -->
-<button class="mode-btn" onclick="setMode('text')">📝 Create Text</button>
-</div>
-<!-- Paste Mode -->
-<div id="pasteMode" class="paste-area" tabindex="0">
-<div class="paste-icon">📸</div>
-<h3>Press Ctrl+V to paste screenshot</h3>
-<p style="color: #7f8c8d; margin-top: 10px;">
+
+
+                </div>
+            </div>
+            <!-- Paste & Create Section -->
+            <div id="paste" class="section" id="paste-section">
+                <h1>Paste Screenshot or Create Content</h1>
+                <div id="pasteAlert"></div>
+                <div class="mode-selector">
+                    <button class="mode-btn active" onclick="setMode('paste')">📸 Paste Screenshot</button>
+                    <!-- <button class="mode-btn" onclick="setMode('draw')">✏️ Draw</button> -->
+                    <button class="mode-btn" onclick="setMode('text')">📝 Create Text</button>
+                </div>
+                <!-- Paste Mode -->
+                <div id="pasteMode" class="paste-area" tabindex="0">
+                    <div class="paste-icon">📸</div>
+                    <h3>Press Ctrl+V to paste screenshot</h3>
+                    <p style="color: #7f8c8d; margin-top: 10px;">
                         Take a screenshot anywhere and paste it here!<br>
                         Or drag and drop an image file
-</p>
-<img id="pastedImage" style="display: none; max-width: 100%; margin-top: 20px; border-radius: 8px;">
-</div>
-<!-- Draw Mode -->
-<div id="drawMode" style="display: none;">
-<div class="tools-container">
-<label>Color: <input type="color" id="drawColor" value="#000000" class="color-picker"></label>
-<label>Size: <input type="range" id="brushSize" min="1" max="20" value="3" class="brush-size"></label>
-<button class="btn" onclick="clearCanvas()">🗑️ Clear</button>
-</div>
-<canvas id="drawCanvas" width="100%" height="400"></canvas> <!-- Responsive canvas -->
-</div>
-<!-- Text Mode -->
-<div id="textMode" style="display: none;" class="create-content-wrapper">
-<div class="form-group">
-<label for="textTitle">Document Title</label>
-<input type="text" id="textTitle" placeholder="My Document">
-</div>
-<div class="form-group">
-<label for="textContent">Content</label>
-<textarea id="textContent" placeholder="Write your content here..."></textarea>
-</div>
-</div>
-<!-- Save Actions (Fixed Bottom) -->
-<div class="save-actions" id="saveActions">
-<input type="text" id="pastedFileName" class="btn" placeholder="Enter filename (e.g., document.txt)" style="margin: 0; flex: 1; background: #f8f9fa; color: #333;">
-<button class="btn" onclick="saveContent()">💾 Save</button>
-<button class="btn close-btn" onclick="resetPaste()">Cancel</button>
-</div>
-</div>
-<!-- View Section -->
-<div id="view" class="section">
-<h1>All Uploaded Files</h1>
-<div id="viewAlert"></div>
-<div id="filesContainer" class="loading">
-                    Loading files...
-</div>
-</div>
-<!-- Saved URLs Section -->
-<div id="urls" class="section urls-section">
-<h1>Saved URLs</h1>
-<div id="urlsAlert"></div>
-<div class="url-input-form">
-<div class="form-group" style="flex: 1; min-width: 200px;">
-<label for="urlInput">Enter URL</label>
-<input type="url" id="urlInput" placeholder="https://example.com" required>
-</div>
-<div class="form-group" style="flex: 1; min-width: 150px;">
-<label for="urlTitle">Title (Optional)</label>
-<input type="text" id="urlTitle" placeholder="Page Title">
-</div>
-<button class="btn" onclick="saveUrl()">🔗 Save URL</button>
-</div>
-<div id="urlsContainer" class="urls-container loading">
-Loading saved URLs...
-</div>
-</div>
-</div>
-</div>
-
-
-<!-- Delete URL Modal -->
-<div id="deleteUrlModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Delete URL (Admin Only)</h2>
-        </div>
-        <form id="deleteUrlForm">
-            <div class="form-group">
-                <label for="deleteUrlEmail">Admin Email *</label>
-                <input type="email" id="deleteUrlEmail" required placeholder="abc@gmail.com">
+                    </p>
+                    <img id="pastedImage" style="display: none; max-width: 100%; margin-top: 20px; border-radius: 8px;">
+                </div>
+                <!-- Draw Mode -->
+                <div id="drawMode" style="display: none;">
+                    <div class="tools-container">
+                        <label>Color: <input type="color" id="drawColor" value="#000000" class="color-picker"></label>
+                        <label>Size: <input type="range" id="brushSize" min="1" max="20" value="3" class="brush-size"></label>
+                        <button class="btn" onclick="clearCanvas()">🗑️ Clear</button>
+                    </div>
+                    <canvas id="drawCanvas" width="100%" height="400"></canvas> <!-- Responsive canvas -->
+                </div>
+                <!-- Text Mode -->
+                <div id="textMode" style="display: none;" class="create-content-wrapper">
+                    <div class="form-group">
+                        <label for="textTitle">Document Title</label>
+                        <input type="text" id="textTitle" placeholder="My Document">
+                    </div>
+                    <div class="form-group">
+                        <label for="textContent">Content</label>
+                        <textarea id="textContent" placeholder="Write your content here..."></textarea>
+                    </div>
+                </div>
+                <!-- Save Actions (Fixed Bottom) -->
+                <div class="save-actions" id="saveActions">
+                    <input type="text" id="pastedFileName" class="btn" placeholder="Enter filename (e.g., document.txt)" style="margin: 0; flex: 1; background: #f8f9fa; color: #333;">
+                    <button class="btn" onclick="saveContent()">💾 Save</button>
+                    <button class="btn close-btn" onclick="resetPaste()">Cancel</button>
+                </div>
             </div>
-            <p style="color: #e74c3c; margin-bottom: 15px;">
-                ⚠️ Deleting URL: <strong id="deleteUrlTitle"></strong>
-            </p>
-            <input type="hidden" id="deleteUrlId">
-            <button type="submit" class="btn btn-delete">🗑️ Delete URL</button>
-            <button type="button" class="btn close-btn" onclick="closeDeleteUrlModal()">Cancel</button>
-        </form>
+            <!-- View Section -->
+            <div id="view" class="section">
+                <h1>All Uploaded Files</h1>
+                <div id="viewAlert"></div>
+                <div id="filesContainer" class="loading">
+                    Loading files...
+                </div>
+            </div>
+            <!-- Saved URLs Section -->
+            <div id="urls" class="section urls-section">
+                <h1>Saved URLs</h1>
+                <div id="urlsAlert"></div>
+                <div class="url-input-form">
+                    <div class="form-group" style="flex: 1; min-width: 200px;">
+                        <label for="urlInput">Enter URL</label>
+                        <input type="url" id="urlInput" placeholder="https://example.com" required>
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 150px;">
+                        <label for="urlTitle">Title (Optional)</label>
+                        <input type="text" id="urlTitle" placeholder="Page Title">
+                    </div>
+                    <button class="btn" onclick="saveUrl()">🔗 Save URL</button>
+                </div>
+                <div id="urlsContainer" class="urls-container loading">
+                    Loading saved URLs...
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-
-
-
-
-<!-- View File Modal -->
-<div id="viewModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<h2 id="viewFileName">File Viewer</h2>
-<button class="btn close-btn maximize-btn" onclick="toggleMaximize()">⛶ Maximize</button>
-<button class="btn close-btn" onclick="closeViewModal()">✕ Close</button>
-</div>
-<div class="viewer-container" id="fileViewer">
+    <!-- Delete URL Modal -->
+    <div id="deleteUrlModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Delete URL (Admin Only)</h2>
+            </div>
+            <form id="deleteUrlForm">
+                <div class="form-group">
+                    <label for="deleteUrlEmail">Admin Email *</label>
+                    <input type="email" id="deleteUrlEmail" required placeholder="abc@gmail.com">
+                </div>
+                <p style="color: #e74c3c; margin-bottom: 15px;">
+                    ⚠️ Deleting URL: <strong id="deleteUrlTitle"></strong>
+                </p>
+                <input type="hidden" id="deleteUrlId">
+                <button type="submit" class="btn btn-delete">🗑️ Delete URL</button>
+                <button type="button" class="btn close-btn" onclick="closeDeleteUrlModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+    <!-- View File Modal - Full screen capable -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="viewFileName">File Viewer</h2>
+                <button class="btn close-btn maximize-btn" onclick="toggleMaximize()">⛶ Maximize</button>
+                <button class="btn close-btn" onclick="closeViewModal()">✕ Close</button>
+            </div>
+            <div class="viewer-container" id="fileViewer">
                 Loading...
-</div>
-</div>
-</div>
-<!-- Update Modal -->
-<div id="updateModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<h2>Update File (Admin Only)</h2>
-</div>
-<form id="updateForm">
-<div class="form-group">
-<label for="updateEmail">Admin Email *</label>
-<input type="email" id="updateEmail" required placeholder="abc@gmail.com">
-</div>
-<div class="form-group">
-<label for="updateFile">Select New File *</label>
-<input type="file" id="updateFile" required>
-</div>
-<input type="hidden" id="updateFileId">
-<button type="submit" class="btn">🔄 Update</button>
-<button type="button" class="btn close-btn" onclick="closeUpdateModal()">Cancel</button>
-</form>
-</div>
-</div>
-<!-- Delete Modal -->
-<div id="deleteModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<h2>Delete File (Admin Only)</h2>
-</div>
-<form id="deleteForm">
-<div class="form-group">
-<label for="deleteEmail">Admin Email *</label>
-<input type="email" id="deleteEmail" required placeholder="abc@gmail.com">
-</div>
-<p style="color: #e74c3c; margin-bottom: 15px;">
+            </div>
+        </div>
+    </div>
+    <!-- Update Modal -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update File (Admin Only)</h2>
+            </div>
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="updateEmail">Admin Email *</label>
+                    <input type="email" id="updateEmail" required placeholder="abc@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label for="updateFile">Select New File *</label>
+                    <input type="file" id="updateFile" required>
+                </div>
+                <input type="hidden" id="updateFileId">
+                <button type="submit" class="btn">🔄 Update</button>
+                <button type="button" class="btn close-btn" onclick="closeUpdateModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Delete File (Admin Only)</h2>
+            </div>
+            <form id="deleteForm">
+                <div class="form-group">
+                    <label for="deleteEmail">Admin Email *</label>
+                    <input type="email" id="deleteEmail" required placeholder="abc@gmail.com">
+                </div>
+                <p style="color: #e74c3c; margin-bottom: 15px;">
                     ⚠️ This action cannot be undone!
-</p>
-<input type="hidden" id="deleteFileId">
-<button type="submit" class="btn btn-delete">🗑️ Delete</button>
-<button type="button" class="btn close-btn" onclick="closeDeleteModal()">Cancel</button>
-</form>
-</div>
-</div>
-<!-- PDF.js Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-// Set worker source for PDF.js (required)
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-let currentMode = 'paste';
-let canvas, ctx, isDrawing = false;
-let currentFileId = null;
-let currentFileName = null;
-let isMaximized = false;
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-setupCanvas();
-setupPasteArea();
-        });
-// Show section
-function showSection(sectionId) {
-document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-document.getElementById(sectionId).classList.add('active');
-event.target.classList.add('active');
-if (sectionId === 'view') {
-loadFiles();
-            } else if (sectionId === 'urls') {
-loadUrls();
-            }
-        }
+                </p>
+                <input type="hidden" id="deleteFileId">
+                <button type="submit" class="btn btn-delete">🗑️ Delete</button>
+                <button type="button" class="btn close-btn" onclick="closeDeleteModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+    <!-- AI Help Elements (Integrated) -->
+    <!-- Floating AI Help Button -->
+    <button class="ai-help-button" id="aiHelpBtn" title="AI Help">
+        🤖
+    </button>
+    <!-- Main AI Container -->
+    <div class="ai-container" id="aiContainer">
+        <div class="header">
+            <h3>🤖 AI Document Helper</h3>
+            <button class="close-btn" id="closeBtn">✕</button>
+        </div>
+        <div class="upload-section">
+            <div class="upload-options">
+                <label class="upload-btn" id="uploadFileBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <span>Upload File</span>
+                    <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.bmp,.tiff">
+                </label>
+                <button class="upload-btn" id="screenshotBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                        <line x1="7" y1="2" x2="7" y2="22"></line>
+                        <line x1="17" y1="2" x2="17" y2="22"></line>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <line x1="2" y1="7" x2="7" y2="7"></line>
+                        <line x1="2" y1="17" x2="7" y2="17"></line>
+                        <line x1="17" y1="17" x2="22" y2="17"></line>
+                        <line x1="17" y1="7" x2="22" y2="7"></line>
+                    </svg>
+                    <span>Screenshot</span>
+                </button>
+                <button class="upload-btn" id="clearBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span>Clear</span>
+                </button>
+            </div>
+            <div class="file-info" id="fileInfo">
+                <span>📄</span>
+                <span id="fileName"></span>
+            </div>
+        </div>
+        <div class="chat-section">
+            <div class="messages-container" id="messagesContainer">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h4>Ready to Help!</h4>
+                    <p>Upload a document or take a screenshot</p>
+                </div>
+            </div>
+        </div>
+        <div class="input-section">
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    id="queryInput"
+                    placeholder="Ask about your document..."
+                    disabled
+                >
+                <button class="mic-btn" id="micBtn" title="Speak your query">🎤</button>
+                <button class="send-btn" id="sendBtn" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+                <button class="speaker-btn" id="speakerBtn" title="Read response aloud" disabled>🔊</button>
+            </div>
+        </div>
+    </div>
+    <!-- Screen Capture Modal -->
+    <div class="capture-modal" id="captureModal">
+        <div class="capture-area" id="captureArea"></div>
+        <div class="capture-controls">
+            <button class="upload-btn" id="fullPageBtn" style="padding: 10px 20px;">
+                📄 Full Page
+            </button>
+            <button class="upload-btn" id="captureBtn" style="padding: 10px 20px;">
+                📸 Capture Area
+            </button>
+            <button class="upload-btn" id="cancelCaptureBtn" style="padding: 10px 20px; background: #e74c3c; color: white;">
+                ❌ Cancel
+            </button>
+        </div>
+    </div>
+    <canvas id="screenshotCanvas"></canvas>
 
+    <script>
+document.getElementById('uploadFile').addEventListener('change', function () {
+    const fileBox = document.getElementById('selectedFileName');
+    const selectBtn = document.getElementById('selectBtn');
 
-// Set mode
-function setMode(mode) {
-currentMode = mode;
-document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-event.target.classList.add('active');
-document.getElementById('pasteMode').style.display = mode === 'paste' ? 'flex' : 'none';
-document.getElementById('drawMode').style.display = mode === 'draw' ? 'block' : 'none';
-document.getElementById('textMode').style.display = mode === 'text' ? 'block' : 'none';
-// Show save actions for all creation modes
-const saveActions = document.getElementById('saveActions');
-if (mode === 'paste' || mode === 'draw' || mode === 'text') {
-saveActions.classList.add('active');
-// Sync filename for text mode
-if (mode === 'text') {
-const title = document.getElementById('textTitle').value || 'document';
-document.getElementById('pastedFileName').value = title.endsWith('.txt') ? title : title + '.txt';
-    } else if (mode === 'paste') {
-const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-document.getElementById('pastedFileName').value = `screenshot-${timestamp}.png`;
-    } else {
-document.getElementById('pastedFileName').value = `drawing-${Date.now()}.png`;
+    if (this.files.length > 0) {
+        // Hide select button
+        selectBtn.style.display = 'none';
+
+        // Show file name
+        fileBox.style.display = 'block';
+        fileBox.textContent = `📄 ${this.files[0].name}`;
     }
-// Hide image in text mode
-document.getElementById('pastedImage').style.display = mode === 'text' ? 'none' : 'block';
-} else {
-saveActions.classList.remove('active');
-}
-        }
-// Setup canvas for drawing
-function setupCanvas() {
-canvas = document.getElementById('drawCanvas');
-ctx = canvas.getContext('2d');
-ctx.lineCap = 'round';
-ctx.lineJoin = 'round';
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseout', stopDrawing);
-// Touch support
-canvas.addEventListener('touchstart', handleTouch);
-canvas.addEventListener('touchmove', handleTouch);
-canvas.addEventListener('touchend', stopDrawing);
-// Resize canvas on window resize
-window.addEventListener('resize', () => {
-canvas.width = canvas.offsetWidth;
-canvas.height = 400; // Fixed height for responsiveness
 });
-        }
-function startDrawing(e) {
-isDrawing = true;
-const rect = canvas.getBoundingClientRect();
-ctx.beginPath();
-ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        }
-function draw(e) {
-if (!isDrawing) return;
-const rect = canvas.getBoundingClientRect();
-ctx.strokeStyle = document.getElementById('drawColor').value;
-ctx.lineWidth = document.getElementById('brushSize').value;
-ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-ctx.stroke();
-        }
-function stopDrawing() {
-isDrawing = false;
-        }
-function handleTouch(e) {
-e.preventDefault();
-const touch = e.touches[0];
-const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
-clientX: touch.clientX,
-clientY: touch.clientY
-            });
-canvas.dispatchEvent(mouseEvent);
-        }
-function clearCanvas() {
-ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-// Setup paste area
-function setupPasteArea() {
-const pasteArea = document.getElementById('pasteMode');
-// Paste event
-pasteArea.addEventListener('paste', handlePaste);
-document.addEventListener('paste', (e) => {
-if (currentMode === 'paste' && document.getElementById('paste').classList.contains('active')) {
-handlePaste(e);
-                }
-            });
-// Drag and drop
-pasteArea.addEventListener('dragover', (e) => {
-e.preventDefault();
-pasteArea.classList.add('dragover');
-            });
-pasteArea.addEventListener('dragleave', () => {
-pasteArea.classList.remove('dragover');
-            });
-pasteArea.addEventListener('drop', (e) => {
-e.preventDefault();
-pasteArea.classList.remove('dragover');
-const file = e.dataTransfer.files[0];
-if (file && file.type.startsWith('image/')) {
-displayPastedImage(file);
-                }
-            });
-        }
-function handlePaste(e) {
-const items = e.clipboardData.items;
-for (let item of items) {
-if (item.type.indexOf('image') !== -1) {
-const blob = item.getAsFile();
-displayPastedImage(blob);
-break;
-                }
+</script>
+
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        // Set worker source for PDF.js (required)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        let currentMode = 'paste';
+        let canvas, ctx, isDrawing = false;
+        let currentFileId = null;
+        let currentFileName = null;
+        let isMaximized = false;
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupCanvas();
+            setupPasteArea();
+        });
+        // Show section - CORRECTED: Accept event parameter
+        function showSection(sectionId, e) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            e.target.classList.add('active');
+            if (sectionId === 'view') {
+                loadFiles();
+            } else if (sectionId === 'urls') {
+                loadUrls();
             }
         }
-function displayPastedImage(blob) {
-const reader = new FileReader();
-reader.onload = (e) => {
-document.getElementById('pastedImage').src = e.target.result;
-document.getElementById('pastedImage').style.display = 'block';
-document.getElementById('pasteMode').style.display = 'none';
-            };
-reader.readAsDataURL(blob);
-// Store blob for saving
-window.currentBlob = blob;
-        }
-async function saveContent() {
-let file;
-let filename = document.getElementById('pastedFileName').value || 'file';
-if (currentMode === 'paste') {
-if (!window.currentBlob) {
-showAlert('pasteAlert', '❌ No image to save', 'error');
-return;
-                }
-file = new File([window.currentBlob], filename, { type: 'image/png' });
-            } else if (currentMode === 'draw') {
-const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-if (!filename.endsWith('.png')) filename += '.png';
-file = new File([blob], filename, { type: 'image/png' });
-            } else if (currentMode === 'text') {
-const title = document.getElementById('textTitle').value || 'document';
-const content = document.getElementById('textContent').value;
-if (!content.trim()) {
-showAlert('pasteAlert', '❌ Please enter some content', 'error');
-return;
-                }
-const blob = new Blob([content], { type: 'text/plain' });
-file = new File([blob], title.endsWith('.txt') ? title : title + '.txt', { type: 'text/plain' });
-            }
-const formData = new FormData();
-formData.append('file', file);
-try {
-const response = await fetch('/api/upload', {
-method: 'POST',
-body: formData
-                });
-const data = await response.json();
-if (response.ok) {
-showAlert('pasteAlert', '✅ ' + data.message, 'success');
-resetPaste();
-// Refresh file list to show new document
-loadFiles();
+        // Set mode
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('pasteMode').style.display = mode === 'paste' ? 'flex' : 'none';
+            document.getElementById('drawMode').style.display = mode === 'draw' ? 'block' : 'none';
+            document.getElementById('textMode').style.display = mode === 'text' ? 'block' : 'none';
+            // Show save actions for all creation modes
+            const saveActions = document.getElementById('saveActions');
+            if (mode === 'paste' || mode === 'draw' || mode === 'text') {
+                saveActions.classList.add('active');
+                // Sync filename for text mode
+                if (mode === 'text') {
+                    const title = document.getElementById('textTitle').value || 'document';
+                    document.getElementById('pastedFileName').value = title.endsWith('.txt') ? title : title + '.txt';
+                } else if (mode === 'paste') {
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                    document.getElementById('pastedFileName').value = `screenshot-${timestamp}.png`;
                 } else {
-showAlert('pasteAlert', '❌ ' + data.message, 'error');
+                    document.getElementById('pastedFileName').value = `drawing-${Date.now()}.png`;
+                }
+                // Hide image in text mode
+                document.getElementById('pastedImage').style.display = mode === 'text' ? 'none' : 'block';
+            } else {
+                saveActions.classList.remove('active');
+            }
+        }
+        // Setup canvas for drawing
+        function setupCanvas() {
+            canvas = document.getElementById('drawCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            // Touch support
+            canvas.addEventListener('touchstart', handleTouch);
+            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchend', stopDrawing);
+            // Resize canvas on window resize
+            window.addEventListener('resize', () => {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = 400; // Fixed height for responsiveness
+            });
+        }
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.strokeStyle = document.getElementById('drawColor').value;
+            ctx.lineWidth = document.getElementById('brushSize').value;
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+        }
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        // Setup paste area
+        function setupPasteArea() {
+            const pasteArea = document.getElementById('pasteMode');
+            if (!pasteArea) return;
+            // Paste event
+            pasteArea.addEventListener('paste', handlePaste);
+            document.addEventListener('paste', (e) => {
+                if (currentMode === 'paste' && document.getElementById('paste').classList.contains('active')) {
+                    handlePaste(e);
+                }
+            });
+            // Drag and drop
+            pasteArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                pasteArea.classList.add('dragover');
+            });
+            pasteArea.addEventListener('dragleave', () => {
+                pasteArea.classList.remove('dragover');
+            });
+            pasteArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                pasteArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    displayPastedImage(file);
+                }
+            });
+        }
+        function handlePaste(e) {
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const blob = item.getAsFile();
+                    displayPastedImage(blob);
+                    break;
+                }
+            }
+        }
+        function displayPastedImage(blob) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('pastedImage').src = e.target.result;
+                document.getElementById('pastedImage').style.display = 'block';
+                document.getElementById('pasteMode').style.display = 'none';
+            };
+            reader.readAsDataURL(blob);
+            // Store blob for saving
+            window.currentBlob = blob;
+        }
+        async function saveContent() {
+            let file;
+            let filename = document.getElementById('pastedFileName').value || 'file';
+            if (currentMode === 'paste') {
+                if (!window.currentBlob) {
+                    showAlert('pasteAlert', '❌ No image to save', 'error');
+                    return;
+                }
+                file = new File([window.currentBlob], filename, { type: 'image/png' });
+            } else if (currentMode === 'draw') {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                if (!filename.endsWith('.png')) filename += '.png';
+                file = new File([blob], filename, { type: 'image/png' });
+            } else if (currentMode === 'text') {
+                const title = document.getElementById('textTitle').value || 'document';
+                const content = document.getElementById('textContent').value;
+                if (!content.trim()) {
+                    showAlert('pasteAlert', '❌ Please enter some content', 'error');
+                    return;
+                }
+                const blob = new Blob([content], { type: 'text/plain' });
+                file = new File([blob], title.endsWith('.txt') ? title : title + '.txt', { type: 'text/plain' });
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('pasteAlert', '✅ ' + data.message, 'success');
+                    resetPaste();
+                    // Refresh file list to show new document
+                    loadFiles();
+                } else {
+                    showAlert('pasteAlert', '❌ ' + data.message, 'error');
                 }
             } catch (error) {
-showAlert('pasteAlert', '❌ Error saving file', 'error');
+                showAlert('pasteAlert', '❌ Error saving file', 'error');
             }
         }
-function resetPaste() {
-document.getElementById('saveActions').classList.remove('active');
-document.getElementById('pasteMode').style.display = 'flex';
-document.getElementById('drawMode').style.display = 'none';
-document.getElementById('textMode').style.display = 'none';
-document.getElementById('pastedImage').src = '';
-document.getElementById('pastedImage').style.display = 'none';
-document.getElementById('pastedFileName').value = '';
-document.getElementById('textTitle').value = '';
-document.getElementById('textContent').value = '';
-clearCanvas();
-window.currentBlob = null;
+        function resetPaste() {
+            document.getElementById('saveActions').classList.remove('active');
+            document.getElementById('pasteMode').style.display = 'flex';
+            document.getElementById('drawMode').style.display = 'none';
+            document.getElementById('textMode').style.display = 'none';
+            document.getElementById('pastedImage').src = '';
+            document.getElementById('pastedImage').style.display = 'none';
+            document.getElementById('pastedFileName').value = '';
+            document.getElementById('textTitle').value = '';
+            document.getElementById('textContent').value = '';
+            clearCanvas();
+            window.currentBlob = null;
         }
-// Show alert
-function showAlert(containerId, message, type) {
-const container = document.getElementById(containerId);
-container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-setTimeout(() => {
-container.innerHTML = '';
+        // Show alert
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
             }, 5000);
         }
-// Upload form
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-e.preventDefault();
-const fileInput = document.getElementById('uploadFile');
-const file = fileInput.files[0];
-if (!file) {
-showAlert('uploadAlert', '❌ Please select a file', 'error');
-return;
+        // Upload form
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('uploadFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                showAlert('uploadAlert', '❌ Please select a file', 'error');
+                return;
             }
-const formData = new FormData();
-formData.append('file', file);
-try {
-const response = await fetch('/api/upload', {
-method: 'POST',
-body: formData
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
                 });
-const data = await response.json();
-if (response.ok) {
-showAlert('uploadAlert', '✅ ' + data.message, 'success');
-document.getElementById('uploadForm').reset();
-// Refresh file list after upload
-loadFiles();
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('uploadAlert', '✅ ' + data.message, 'success');
+                    document.getElementById('uploadForm').reset();
+                    // Refresh file list after upload
+                    loadFiles();
                 } else {
-showAlert('uploadAlert', '❌ ' + data.message, 'error');
+                    showAlert('uploadAlert', '❌ ' + data.message, 'error');
                 }
             } catch (error) {
-showAlert('uploadAlert', '❌ Error uploading file: ' + error.message, 'error');
+                showAlert('uploadAlert', '❌ Error uploading file: ' + error.message, 'error');
             }
         });
-// Load files
-async function loadFiles() {
-const container = document.getElementById('filesContainer');
-container.innerHTML = '<div class="loading">Loading files...</div>';
-try {
-const response = await fetch('/api/files');
-const data = await response.json();
-if (response.ok && data.files && data.files.length > 0) {
-container.innerHTML = '<div class="files-grid">' +
-data.files.map(file => createFileCard(file)).join('') +
-'</div>';
+        // Load files
+        async function loadFiles() {
+            const container = document.getElementById('filesContainer');
+            container.innerHTML = '<div class="loading">Loading files...</div>';
+            try {
+                const response = await fetch('/api/files');
+                const data = await response.json();
+                if (response.ok && data.files && data.files.length > 0) {
+                    container.innerHTML = '<div class="files-grid">' +
+                        data.files.map(file => createFileCard(file)).join('') +
+                        '</div>';
                 } else {
-container.innerHTML = `
+                    container.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">📁</div>
                             <h3>No files uploaded yet</h3>
@@ -1089,14 +1699,14 @@ container.innerHTML = `
                     `;
                 }
             } catch (error) {
-container.innerHTML = '<div class="alert alert-error">❌ Error loading files</div>';
+                container.innerHTML = '<div class="alert alert-error">❌ Error loading files</div>';
             }
         }
-// Create file card
-function createFileCard(file) {
-const icon = getFileIcon(file.filename);
-const date = new Date(file.uploaded_at).toLocaleString();
-return `
+        // Create file card
+        function createFileCard(file) {
+            const icon = getFileIcon(file.filename);
+            const date = new Date(file.uploaded_at).toLocaleString();
+            return `
                 <div class="file-card">
                     <div class="file-icon">${icon}</div>
                     <div class="file-name">${file.filename}</div>
@@ -1110,385 +1720,844 @@ return `
                 </div>
             `;
         }
-// Get file icon
-function getFileIcon(filename) {
-const ext = filename.split('.').pop().toLowerCase();
-const icons = {
-'pdf': '📄',
-'doc': '📝', 'docx': '📝',
-'xls': '📊', 'xlsx': '📊',
-'ppt': '📽️', 'pptx': '📽️',
-'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️', 'bmp': '🖼️',
-'mp4': '🎬', 'avi': '🎬', 'mov': '🎬',
-'mp3': '🎵', 'wav': '🎵',
-'zip': '📦', 'rar': '📦',
-'txt': '📃',
-'html': '🌐', 'css': '🎨', 'js': '⚙️',
-'url': '🔗'
+        // Get file icon
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '📄',
+                'doc': '📝', 'docx': '📝',
+                'xls': '📊', 'xlsx': '📊',
+                'ppt': '📽️', 'pptx': '📽️',
+                'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️', 'bmp': '🖼️',
+                'mp4': '🎬', 'avi': '🎬', 'mov': '🎬',
+                'mp3': '🎵', 'wav': '🎵',
+                'zip': '📦', 'rar': '📦',
+                'txt': '📃',
+                'html': '🌐', 'css': '🎨', 'js': '⚙️',
+                'url': '🔗'
             };
-return icons[ext] || '📄';
+            return icons[ext] || '📄';
         }
-// Format file size
-function formatFileSize(bytes) {
-if (bytes === 0) return '0 Bytes';
-const k = 1024;
-const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-const i = Math.floor(Math.log(bytes) / Math.log(k));
-return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
         }
-// Extract URLs from text
-function extractUrls(text) {
-const urlRegex = /(https?:\/\/[^\s]+)/g;
-let match, urls = [];
-while ((match = urlRegex.exec(text)) !== null) {
-urls.push(match[1]);
-}
-return [...new Set(urls)]; // Remove duplicates
+        // Extract URLs from text
+        function extractUrls(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            let match, urls = [];
+            while ((match = urlRegex.exec(text)) !== null) {
+                urls.push(match[1]);
+            }
+            return [...new Set(urls)]; // Remove duplicates
         }
-// View file
-async function viewFile(fileId, filename) {
-currentFileId = fileId;
-currentFileName = filename;
-isMaximized = false; // Reset to default
-document.getElementById('viewModal').classList.remove('maximized');
-document.getElementById('viewModal').classList.add('active');
-document.getElementById('viewFileName').textContent = filename;
-const viewer = document.getElementById('fileViewer');
-viewer.innerHTML = '<div class="loading">Loading file...</div>';
-try {
-const ext = filename.split('.').pop().toLowerCase();
-const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-const url = `/api/files/${fileId}/download`;
-const response = await fetch(url);
-if (!response.ok) throw new Error('Failed to fetch file');
-const blob = await response.blob();
-const blobUrl = URL.createObjectURL(blob);
-if (imageExts.includes(ext)) {
-const img = document.createElement('img');
-img.src = blobUrl;
-img.alt = filename;
-img.onclick = function() {
-this.style.transform = this.style.transform === 'scale(2)' ? 'scale(1)' : 'scale(2)';
-this.style.cursor = this.style.transform === 'scale(2)' ? 'zoom-out' : 'zoom-in';
-};
-viewer.innerHTML = '';
-viewer.appendChild(img);
-} else if (ext === 'pdf') {
-await renderPDF(blobUrl, viewer);
-} else if (ext === 'txt' || ext === 'log' || ext === 'md') {
-const text = await blob.text();
-const escaped = escapeHtml(text);
-const urls = extractUrls(text);
-let urlList = '';
-if (urls.length > 0) {
-urlList = `
-<div class="extracted-urls">
-<h4>Extracted URLs (Numbered):</h4>
-<ol>
-${urls.map((url, index) => `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></li>`).join('')}
-</ol>
-</div>
-`;
-}
-viewer.innerHTML = `<pre>${escaped}</pre>${urlList}`;
-} else if (ext === 'html' || ext === 'htm') {
-const iframe = document.createElement('iframe');
-iframe.src = blobUrl;
-iframe.style.width = '100%';
-iframe.style.height = '100%';
-iframe.style.border = 'none';
-iframe.style.borderRadius = '0';
-viewer.innerHTML = '';
-viewer.appendChild(iframe);
-} else if (ext === 'url') {
-const urlContent = await blob.text();
-const actualUrl = urlContent.trim();
-viewer.innerHTML = `
-<div style="text-align: center; padding: 30px;">
-<h3>${filename}</h3>
-<p style="font-size: 16px; margin-bottom: 15px;">URL: <a href="${actualUrl}" target="_blank" rel="noopener noreferrer">${actualUrl}</a></p>
-<button class="btn" onclick="window.open('${actualUrl}', '_blank')">🌐 Go to Page</button>
-</div>
-`;
-} else {
-viewer.innerHTML = `
+        // View file - Modified to show AI button and full screen
+        async function viewFile(fileId, filename) {
+            currentFileId = fileId;
+            currentFileName = filename;
+            isMaximized = false; // Reset to default
+            document.getElementById('viewModal').classList.remove('maximized');
+            document.getElementById('viewModal').classList.add('active');
+            document.getElementById('viewFileName').textContent = filename;
+            const viewer = document.getElementById('fileViewer');
+            viewer.innerHTML = '<div class="loading">Loading file...</div>';
+            // Show AI Help Button when modal opens
+            document.getElementById('aiHelpBtn').classList.add('visible');
+            document.getElementById('aiHelpBtn').classList.remove('hidden');
+            try {
+                const ext = filename.split('.').pop().toLowerCase();
+                const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+                const url = `/api/files/${fileId}/download`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch file');
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                if (imageExts.includes(ext)) {
+                    const img = document.createElement('img');
+                    img.src = blobUrl;
+                    img.alt = filename;
+                    img.onclick = function() {
+                        this.style.transform = this.style.transform === 'scale(2)' ? 'scale(1)' : 'scale(2)';
+                        this.style.cursor = this.style.transform === 'scale(2)' ? 'zoom-out' : 'zoom-in';
+                    };
+                    viewer.innerHTML = '';
+                    viewer.appendChild(img);
+                } else if (ext === 'pdf') {
+                    await renderPDF(blobUrl, viewer);
+                } else if (ext === 'txt' || ext === 'log' || ext === 'md') {
+                    const text = await blob.text();
+                    const escaped = escapeHtml(text);
+                    const urls = extractUrls(text);
+                    let urlList = '';
+                    if (urls.length > 0) {
+                        urlList = `
+                            <div class="extracted-urls">
+                                <h4>Extracted URLs (Numbered):</h4>
+                                <ol>
+                                    ${urls.map((url, index) => `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></li>`).join('')}
+                                </ol>
+                            </div>
+                        `;
+                    }
+                    viewer.innerHTML = `<pre>${escaped}</pre>${urlList}`;
+                } else if (ext === 'html' || ext === 'htm') {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = blobUrl;
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.style.border = 'none';
+                    iframe.style.borderRadius = '0';
+                    viewer.innerHTML = '';
+                    viewer.appendChild(iframe);
+                } else if (ext === 'url') {
+                    const urlContent = await blob.text();
+                    const actualUrl = urlContent.trim();
+                    viewer.innerHTML = `
+                        <div style="text-align: center; padding: 30px;">
+                            <h3>${filename}</h3>
+                            <p style="font-size: 16px; margin-bottom: 15px;">URL: <a href="${actualUrl}" target="_blank" rel="noopener noreferrer">${actualUrl}</a></p>
+                            <button class="btn" onclick="window.open('${actualUrl}', '_blank')">🌐 Go to Page</button>
+                        </div>
+                    `;
+                } else {
+                    viewer.innerHTML = `
                         <div style="text-align: center; padding: 30px;">
                             <div style="font-size: 48px; margin-bottom: 15px;">📄</div>
                             <p style="font-size: 16px; margin-bottom: 15px;">${filename}</p>
                             <p style="color: #7f8c8d;">Preview not available for this file type.</p>
                         </div>
                     `;
-}
-} catch (error) {
-viewer.innerHTML = '<div class="alert alert-error" style="text-align: center;">❌ Error loading file</div>';
-}
+                }
+                // Cleanup blob URL on close
+                if (blobUrl) window.blobUrls = window.blobUrls || []; window.blobUrls.push(blobUrl);
+            } catch (error) {
+                viewer.innerHTML = '<div class="alert alert-error" style="text-align: center;">❌ Error loading file</div>';
+            }
         }
-async function renderPDF(blobUrl, viewer) {
-try {
-const loadingTask = pdfjsLib.getDocument(blobUrl);
-const pdf = await loadingTask.promise;
-viewer.innerHTML = ''; // Clear loading
-const container = document.createElement('div');
-container.className = 'pdf-container';
-viewer.appendChild(container);
-for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-const page = await pdf.getPage(pageNum);
-const scale = window.innerWidth < 768 ? 1.0 : 1.3; // Adjusted for mobile
-const viewport = page.getViewport({ scale });
-const pageDiv = document.createElement('div');
-pageDiv.className = 'pdf-page';
-const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
-canvas.height = viewport.height;
-canvas.width = viewport.width;
-// Add page label
-const label = document.createElement('div');
-label.style.textAlign = 'center';
-label.style.fontSize = '10px'; /* Smaller */
-label.style.color = '#666';
-label.style.marginBottom = '3px';
-label.textContent = `Page ${pageNum}`;
-pageDiv.appendChild(label);
-pageDiv.appendChild(canvas);
-container.appendChild(pageDiv);
-// Render page
-await page.render({
-canvasContext: context,
-viewport: viewport
-}).promise;
-}
-} catch (error) {
-viewer.innerHTML = '<div class="alert alert-error" style="text-align: center;">❌ Error rendering PDF</div>';
-console.error('PDF render error:', error);
-}
-}
-function escapeHtml(text) {
-const div = document.createElement('div');
-div.textContent = text;
-return div.innerHTML;
-        }
-function toggleMaximize() {
-isMaximized = !isMaximized;
-const modal = document.getElementById('viewModal');
-if (isMaximized) {
-modal.classList.add('maximized');
-document.querySelector('.maximize-btn').textContent = '🔽 Restore';
-} else {
-modal.classList.remove('maximized');
-document.querySelector('.maximize-btn').textContent = '⛶ Maximize';
-}
-}
-function closeViewModal() {
-document.getElementById('viewModal').classList.remove('active', 'maximized');
-if (currentFileId) {
-URL.revokeObjectURL(`/api/files/${currentFileId}/download`); // Cleanup blob URLs if any
-}
-currentFileId = null;
-currentFileName = null;
-isMaximized = false;
-document.querySelector('.maximize-btn').textContent = '⛶ Maximize';
-        }
-// Update modal
-function openUpdateModal(fileId) {
-document.getElementById('updateFileId').value = fileId;
-document.getElementById('updateModal').classList.add('active');
-        }
-function closeUpdateModal() {
-document.getElementById('updateModal').classList.remove('active');
-document.getElementById('updateForm').reset();
-        }
-document.getElementById('updateForm').addEventListener('submit', async (e) => {
-e.preventDefault();
-const fileId = document.getElementById('updateFileId').value;
-const email = document.getElementById('updateEmail').value;
-const file = document.getElementById('updateFile').files[0];
-const formData = new FormData();
-formData.append('file', file);
-formData.append('email', email);
-try {
-const response = await fetch(`/api/files/${fileId}/update`, {
-method: 'PUT',
-body: formData
-                });
-const data = await response.json();
-if (response.ok) {
-showAlert('viewAlert', '✅ ' + data.message, 'success');
-closeUpdateModal();
-loadFiles();
-                } else {
-showAlert('viewAlert', '❌ ' + data.message, 'error');
-closeUpdateModal();
+        async function renderPDF(blobUrl, viewer) {
+            try {
+                const loadingTask = pdfjsLib.getDocument(blobUrl);
+                const pdf = await loadingTask.promise;
+                viewer.innerHTML = ''; // Clear loading
+                const container = document.createElement('div');
+                container.className = 'pdf-container';
+                viewer.appendChild(container);
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const scale = window.innerWidth < 768 ? 1.0 : 1.3; // Adjusted for mobile
+                    const viewport = page.getViewport({ scale });
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'pdf-page';
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    // Add page label
+                    const label = document.createElement('div');
+                    label.style.textAlign = 'center';
+                    label.style.fontSize = '10px'; /* Smaller */
+                    label.style.color = '#666';
+                    label.style.marginBottom = '3px';
+                    label.textContent = `Page ${pageNum}`;
+                    pageDiv.appendChild(label);
+                    pageDiv.appendChild(canvas);
+                    container.appendChild(pageDiv);
+                    // Render page
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
                 }
             } catch (error) {
-showAlert('viewAlert', '❌ Error updating file', 'error');
-closeUpdateModal();
+                viewer.innerHTML = '<div class="alert alert-error" style="text-align: center;">❌ Error rendering PDF</div>';
+                console.error('Error rendering PDF:', error);
             }
-        });
-// Delete modal
-function openDeleteModal(fileId) {
-document.getElementById('deleteFileId').value = fileId;
-document.getElementById('deleteModal').classList.add('active');
         }
-function closeDeleteModal() {
-document.getElementById('deleteModal').classList.remove('active');
-document.getElementById('deleteForm').reset();
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-document.getElementById('deleteForm').addEventListener('submit', async (e) => {
-e.preventDefault();
-const fileId = document.getElementById('deleteFileId').value;
-const email = document.getElementById('deleteEmail').value;
-try {
-const response = await fetch(`/api/files/${fileId}/delete?email=${encodeURIComponent(email)}`, {
-method: 'DELETE'
+        function toggleMaximize() {
+            isMaximized = !isMaximized;
+            const modal = document.getElementById('viewModal');
+            if (isMaximized) {
+                modal.classList.add('maximized');
+                document.querySelector('.maximize-btn').textContent = '⛶ Restore';
+            } else {
+                modal.classList.remove('maximized');
+                document.querySelector('.maximize-btn').textContent = '⛶ Maximize';
+            }
+        }
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('active', 'maximized');
+            // Cleanup blob URLs if any
+            if (window.blobUrls) {
+                window.blobUrls.forEach(url => URL.revokeObjectURL(url));
+                window.blobUrls = [];
+            }
+            // Hide AI Help Button when modal closes
+            document.getElementById('aiHelpBtn').classList.remove('visible');
+            document.getElementById('aiHelpBtn').classList.add('hidden');
+            currentFileId = null;
+            currentFileName = null;
+            isMaximized = false;
+            document.querySelector('.maximize-btn').textContent = '⛶ Maximize';
+        }
+        // Update modal
+        function openUpdateModal(fileId) {
+            document.getElementById('updateFileId').value = fileId;
+            document.getElementById('updateModal').classList.add('active');
+        }
+        function closeUpdateModal() {
+            document.getElementById('updateModal').classList.remove('active');
+            document.getElementById('updateForm').reset();
+        }
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileId = document.getElementById('updateFileId').value;
+            const email = document.getElementById('updateEmail').value;
+            const file = document.getElementById('updateFile').files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('email', email);
+            try {
+                const response = await fetch(`/api/files/${fileId}/update`, {
+                    method: 'PUT',
+                    body: formData
                 });
-const data = await response.json();
-if (response.ok) {
-showAlert('viewAlert', '✅ ' + data.message, 'success');
-closeDeleteModal();
-loadFiles();
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('viewAlert', '✅ ' + data.message, 'success');
+                    closeUpdateModal();
+                    loadFiles();
                 } else {
-showAlert('viewAlert', '❌ ' + data.message, 'error');
-closeDeleteModal();
+                    showAlert('viewAlert', '❌ ' + data.message, 'error');
+                    closeUpdateModal();
                 }
             } catch (error) {
-showAlert('viewAlert', '❌ Error deleting file', 'error');
-closeDeleteModal();
+                showAlert('viewAlert', '❌ Error updating file', 'error');
+                closeUpdateModal();
             }
         });
-// Saved URLs functions
-async function saveUrl() {
-const url = document.getElementById('urlInput').value.trim();
-const title = document.getElementById('urlTitle').value.trim() || url;
-if (!url) {
-showAlert('urlsAlert', '❌ Please enter a URL', 'error');
-return;
-}
-const formData = new FormData();
-formData.append('url', url);
-formData.append('title', title);
-try {
-const response = await fetch('/api/save-url', {
-method: 'POST',
-body: formData
-});
-const data = await response.json();
-if (response.ok) {
-showAlert('urlsAlert', '✅ URL saved: ' + data.message, 'success');
-document.getElementById('urlInput').value = '';
-document.getElementById('urlTitle').value = '';
-loadUrls();
-} else {
-showAlert('urlsAlert', '❌ ' + data.message, 'error');
-}
-} catch (error) {
-showAlert('urlsAlert', '❌ Error saving URL: ' + error.message, 'error');
-}
-}
-async function loadUrls() {
-const container = document.getElementById('urlsContainer');
-container.innerHTML = '<div class="loading">Loading URLs...</div>';
-try {
-const response = await fetch('/api/urls');
-const data = await response.json();
-if (response.ok && data.urls && data.urls.length > 0) {
-container.innerHTML = '<div class="urls-grid">' +
-data.urls.map((urlObj, index) => createUrlCard(urlObj, index + 1)).join('') +
-'</div>';
-} else {
-container.innerHTML = `
-<div class="empty-state">
-<div class="empty-state-icon">🔗</div>
-<h3>No URLs saved yet</h3>
-<p>Save your first URL to get started!</p>
-</div>
-`;
-}
-} catch (error) {
-container.innerHTML = '<div class="alert alert-error">❌ Error loading URLs</div>';
-}
-}
-// function createUrlCard(urlObj, number) {
-// return `
-// <div class="url-card">
-// <div class="url-number">${number}</div>
-// <div class="file-name">${urlObj.title}</div>
-// <div class="url-link">${urlObj.url}</div>
-// <div class="file-actions">
-// <button class="btn btn-small btn-view" onclick="viewUrl('${urlObj.id}')">🌐 Go to Page</button>
-// </div>
-// </div>
-// `;
-// }
-
-
-// Helper function to escape quotes in titles
-function escapeQuotes(str) {
-    return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-}
-
-// Delete URL Modal functions
-function openDeleteUrlModal(urlId, urlTitle) {
-    document.getElementById('deleteUrlId').value = urlId;
-    document.getElementById('deleteUrlTitle').textContent = urlTitle;
-    document.getElementById('deleteUrlModal').classList.add('active');
-}
-
-function closeDeleteUrlModal() {
-    document.getElementById('deleteUrlModal').classList.remove('active');
-    document.getElementById('deleteUrlForm').reset();
-}
-
-document.getElementById('deleteUrlForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const urlId = document.getElementById('deleteUrlId').value;
-    const email = document.getElementById('deleteUrlEmail').value;
-    
-    try {
-        const response = await fetch(`/api/urls/${urlId}/delete?email=${encodeURIComponent(email)}`, {
-            method: 'DELETE'
-        });
-        const data = await response.json();
-        
-        if (response.ok) {
-            showAlert('urlsAlert', '✅ ' + data.message, 'success');
-            closeDeleteUrlModal();
-            loadUrls();
-        } else {
-            showAlert('urlsAlert', '❌ ' + data.message, 'error');
-            closeDeleteUrlModal();
+        // Delete modal
+        function openDeleteModal(fileId) {
+            document.getElementById('deleteFileId').value = fileId;
+            document.getElementById('deleteModal').classList.add('active');
         }
-    } catch (error) {
-        showAlert('urlsAlert', '❌ Error deleting URL', 'error');
-        closeDeleteUrlModal();
-    }
-});
-
-
-
-function createUrlCard(urlObj, number) {
-return `
-<div class="url-card">
-<div class="url-number">${number}</div>
-<div class="file-name">${urlObj.title}</div>
-<div class="url-link">${urlObj.url}</div>
-<div class="file-actions">
-<button class="btn btn-small btn-view" onclick="viewUrl('${urlObj.id}')">🌐 Go to Page</button>
-<button class="btn btn-small btn-delete" onclick="openDeleteUrlModal('${urlObj.id}', '${escapeQuotes(urlObj.title)}')">🗑️ Delete</button>
-</div>
-</div>
-`;
-}
-function viewUrl(id) {
-window.open(`/api/url/${id}`, '_blank');
-}
-// Close modals on background click
-document.querySelectorAll('.modal').forEach(modal => {
-modal.addEventListener('click', (e) => {
-if (e.target === modal) {
-modal.classList.remove('active');
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            document.getElementById('deleteForm').reset();
+        }
+        document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileId = document.getElementById('deleteFileId').value;
+            const email = document.getElementById('deleteEmail').value;
+            try {
+                const response = await fetch(`/api/files/${fileId}/delete?email=${encodeURIComponent(email)}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('viewAlert', '✅ ' + data.message, 'success');
+                    closeDeleteModal();
+                    loadFiles();
+                } else {
+                    showAlert('viewAlert', '❌ ' + data.message, 'error');
+                    closeDeleteModal();
+                }
+            } catch (error) {
+                showAlert('viewAlert', '❌ Error deleting file', 'error');
+                closeDeleteModal();
+            }
+        });
+        // Saved URLs functions
+        async function saveUrl() {
+            const url = document.getElementById('urlInput').value.trim();
+            const title = document.getElementById('urlTitle').value.trim() || url;
+            if (!url) {
+                showAlert('urlsAlert', '❌ Please enter a URL', 'error');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('url', url);
+            formData.append('title', title);
+            try {
+                const response = await fetch('/api/save-url', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('urlsAlert', '✅ URL saved: ' + data.message, 'success');
+                    document.getElementById('urlInput').value = '';
+                    document.getElementById('urlTitle').value = '';
+                    loadUrls();
+                } else {
+                    showAlert('urlsAlert', '❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showAlert('urlsAlert', '❌ Error saving URL: ' + error.message, 'error');
+            }
+        }
+        async function loadUrls() {
+            const container = document.getElementById('urlsContainer');
+            container.innerHTML = '<div class="loading">Loading URLs...</div>';
+            try {
+                const response = await fetch('/api/urls');
+                const data = await response.json();
+                if (response.ok && data.urls && data.urls.length > 0) {
+                    container.innerHTML = '<div class="urls-grid">' +
+                        data.urls.map((urlObj, index) => createUrlCard(urlObj, index + 1)).join('') +
+                        '</div>';
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔗</div>
+                            <h3>No URLs saved yet</h3>
+                            <p>Save your first URL to get started!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                container.innerHTML = '<div class="alert alert-error">❌ Error loading URLs</div>';
+            }
+        }
+        // Helper function to escape quotes in titles
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        }
+        // Delete URL Modal functions
+        function openDeleteUrlModal(urlId, urlTitle) {
+            document.getElementById('deleteUrlId').value = urlId;
+            document.getElementById('deleteUrlTitle').textContent = urlTitle;
+            document.getElementById('deleteUrlModal').classList.add('active');
+        }
+        function closeDeleteUrlModal() {
+            document.getElementById('deleteUrlModal').classList.remove('active');
+            document.getElementById('deleteUrlForm').reset();
+        }
+        document.getElementById('deleteUrlForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const urlId = document.getElementById('deleteUrlId').value;
+            const email = document.getElementById('deleteUrlEmail').value;
+            try {
+                const response = await fetch(`/api/urls/${urlId}/delete?email=${encodeURIComponent(email)}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('urlsAlert', '✅ ' + data.message, 'success');
+                    closeDeleteUrlModal();
+                    loadUrls();
+                } else {
+                    showAlert('urlsAlert', '❌ ' + data.message, 'error');
+                    closeDeleteUrlModal();
+                }
+            } catch (error) {
+                showAlert('urlsAlert', '❌ Error deleting URL', 'error');
+                closeDeleteUrlModal();
+            }
+        });
+        function createUrlCard(urlObj, number) {
+            return `
+                <div class="url-card">
+                    <div class="url-number">${number}</div>
+                    <div class="file-name">${urlObj.title}</div>
+                    <div class="url-link">${urlObj.url}</div>
+                    <div class="file-actions">
+                        <button class="btn btn-small btn-view" onclick="viewUrl('${urlObj.id}')">🌐 Go to Page</button>
+                        <button class="btn btn-small btn-delete" onclick="openDeleteUrlModal('${urlObj.id}', '${escapeQuotes(urlObj.title)}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+        function viewUrl(id) {
+            window.open(`/api/url/${id}`, '_blank');
+        }
+        // Close modals on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
                 }
             });
         });
-</script>
+        // AI Help Script (Integrated) - Enhanced for production, mobile auto-capture, speech features
+        const API_URL = window.location.origin;
+        let sessionId = null;
+        let selectedFile = null;
+        let isCapturing = false;
+        let startX, startY, endX, endY;
+        let lastBotResponse = '';
+        const recognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window ? 
+            (window.SpeechRecognition || window.webkitSpeechRecognition) ? new (window.SpeechRecognition || window.webkitSpeechRecognition)() : null : null;
+        const synthesis = window.speechSynthesis;
+        if (recognition) {
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            // Google-like continuous listening toggle
+            recognition.onstart = () => console.log('Speech recognition started');
+        }
+        // Initialize session on first use
+        async function initSession() {
+            try {
+                const response = await fetch(`${API_URL}/api/session/create`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                sessionId = data.session_id;
+                console.log('Session created:', sessionId);
+            } catch (error) {
+                showError('Failed to initialize session');
+            }
+        }
+        // Show/Hide AI Container - Full screen on mobile
+        document.getElementById('aiHelpBtn').addEventListener('click', () => {
+            const container = document.getElementById('aiContainer');
+            const button = document.getElementById('aiHelpBtn');
+            container.classList.add('show');
+            button.classList.add('hidden');
+            if (!sessionId) {
+                initSession();
+            }
+            // Auto full page capture after 5s on mobile
+            if (window.innerWidth < 769) {
+                setTimeout(() => {
+                    autoFullPageCapture();
+                }, 5000);
+            }
+        });
+        document.getElementById('closeBtn').addEventListener('click', () => {
+            const container = document.getElementById('aiContainer');
+            const button = document.getElementById('aiHelpBtn');
+            container.classList.remove('show');
+            button.classList.remove('hidden');
+        });
+        // File Upload - Show uploaded screenshot in chat
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            selectedFile = e.target.files[0];
+            if (selectedFile && selectedFile.type.startsWith('image/')) {
+                // Show image in chat immediately
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    addMessage('user', `<img src="${e.target.result}" style="max-width: 100%; border-radius: 8px;" alt="Uploaded Screenshot">`);
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+            if (selectedFile) {
+                await uploadFile(selectedFile);
+            }
+        });
+        // Screenshot Functionality - Hide AI, show capture modal with options
+        document.getElementById('screenshotBtn').addEventListener('click', async () => {
+            if (typeof html2canvas === 'undefined') {
+                showError('html2canvas library failed to load. Please refresh the page.');
+                return;
+            }
+            // Hide AI container
+            document.getElementById('aiContainer').classList.remove('show');
+            const modal = document.getElementById('captureModal');
+            modal.classList.add('show');
+            const captureArea = document.getElementById('captureArea');
+            captureArea.style.display = 'block';
+            captureArea.style.left = '0px';
+            captureArea.style.top = '0px';
+            captureArea.style.width = '0px';
+            captureArea.style.height = '0px';
+            isCapturing = false;
+            // Remove previous listeners to avoid duplicates
+            modal.removeEventListener('mousedown', startCapture);
+            modal.removeEventListener('mousemove', updateCapture);
+            modal.removeEventListener('mouseup', endCapture);
+            modal.addEventListener('mousedown', startCapture);
+            modal.addEventListener('mousemove', updateCapture);
+            modal.addEventListener('mouseup', endCapture);
+        });
+        document.getElementById('fullPageBtn').addEventListener('click', async () => {
+            await autoFullPageCapture();
+        });
+        async function autoFullPageCapture() {
+            const modal = document.getElementById('captureModal');
+            modal.style.display = 'none';
+            document.body.style.cursor = 'wait';
+            try {
+                const fullCanvas = await html2canvas(document.body, {
+                    scale: window.devicePixelRatio,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null,
+                    logging: false
+                });
+                fullCanvas.toBlob(async (blob) => {
+                    if (blob) {
+                        const file = new File([blob], `full-page-screenshot-${Date.now()}.png`, { type: 'image/png' });
+                        // Show in chat
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            addMessage('user', `<img src="${e.target.result}" style="max-width: 100%; border-radius: 8px;" alt="Full Page Screenshot">`);
+                        };
+                        reader.readAsDataURL(file);
+                        await uploadFile(file);
+                        // Reopen AI container after upload
+                        document.getElementById('aiContainer').classList.add('show');
+                    } else {
+                        showError('Failed to create image blob');
+                    }
+                }, 'image/png', 0.95);
+            } catch (error) {
+                showError('Full page capture failed: ' + error.message);
+            } finally {
+                document.body.style.cursor = 'default';
+                modal.classList.remove('show');
+                document.getElementById('captureArea').style.display = 'none';
+            }
+        }
+        async function performCapture() {
+            const modal = document.getElementById('captureModal');
+            const captureArea = document.getElementById('captureArea');
+            const rect = captureArea.getBoundingClientRect();
+            const left = rect.left;
+            const top = rect.top;
+            const width = rect.width;
+            const height = rect.height;
+            if (width < 5 || height < 5) {
+                showError('Please select a larger area to capture.');
+                return;
+            }
+            // Temporarily hide modal to avoid capturing it
+            modal.style.display = 'none';
+            document.body.style.cursor = 'wait';
+            try {
+                const fullCanvas = await html2canvas(document.documentElement, {
+                    scale: window.devicePixelRatio > 1 ? 2 : 1, // Higher DPI for better quality
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null, // Preserve transparency if needed
+                    logging: false,
+                    width: document.documentElement.scrollWidth,
+                    height: document.documentElement.scrollHeight
+                });
+                const croppedCanvas = document.createElement('canvas');
+                const ctx = croppedCanvas.getContext('2d');
+                croppedCanvas.width = width;
+                croppedCanvas.height = height;
+                // Account for scroll position
+                const sourceX = window.pageXOffset + left;
+                const sourceY = window.pageYOffset + top;
+                ctx.drawImage(fullCanvas, sourceX, sourceY, width, height, 0, 0, width, height);
+                return new Promise((resolve, reject) => {
+                    croppedCanvas.toBlob(async (blob) => {
+                        if (blob) {
+                            const file = new File([blob], `screenshot-${Date.now()}.png`, { type: 'image/png' });
+                            // Show in chat
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                addMessage('user', `<img src="${e.target.result}" style="max-width: 100%; border-radius: 8px;" alt="Area Screenshot">`);
+                            };
+                            reader.readAsDataURL(file);
+                            try {
+                                await uploadFile(file);
+                                // Reopen AI container after upload
+                                document.getElementById('aiContainer').classList.add('show');
+                                resolve();
+                            } catch (err) {
+                                reject(err);
+                            }
+                        } else {
+                            reject(new Error('Failed to create image blob'));
+                        }
+                    }, 'image/png', 0.95); // High quality
+                });
+            } catch (error) {
+                console.error('Capture error:', error);
+                showError('Screenshot capture failed: ' + (error.message || 'Unknown error. Check console for details.'));
+            } finally {
+                document.body.style.cursor = 'default';
+                captureArea.style.display = 'none';
+                modal.classList.remove('show');
+            }
+        }
+        function startCapture(e) {
+            if (e.target.closest('.capture-controls')) return;
+            isCapturing = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            const captureArea = document.getElementById('captureArea');
+            captureArea.style.left = startX + 'px';
+            captureArea.style.top = startY + 'px';
+            captureArea.style.width = '0px';
+            captureArea.style.height = '0px';
+        }
+        function updateCapture(e) {
+            if (!isCapturing) return;
+            endX = e.clientX;
+            endY = e.clientY;
+            const captureArea = document.getElementById('captureArea');
+            const left = Math.min(startX, endX);
+            const top = Math.min(startY, endY);
+            const width = Math.abs(endX - startX);
+            const height = Math.abs(endY - startY);
+            if (width > 0 && height > 0) {
+                captureArea.style.left = left + 'px';
+                captureArea.style.top = top + 'px';
+                captureArea.style.width = width + 'px';
+                captureArea.style.height = height + 'px';
+            }
+        }
+        async function endCapture(e) {
+            if (!isCapturing) return;
+            isCapturing = false;
+            const captureArea = document.getElementById('captureArea');
+            const width = parseInt(captureArea.style.width) || 0;
+            const height = parseInt(captureArea.style.height) || 0;
+            if (width >= 5 && height >= 5) {
+                // Automatically capture and upload
+                await performCapture();
+            } else {
+                captureArea.style.width = '0px';
+                captureArea.style.height = '0px';
+            }
+        }
+        document.getElementById('captureBtn').addEventListener('click', async () => {
+            await performCapture();
+        });
+        document.getElementById('cancelCaptureBtn').addEventListener('click', () => {
+            const modal = document.getElementById('captureModal');
+            const captureArea = document.getElementById('captureArea');
+            modal.classList.remove('show');
+            captureArea.style.display = 'none';
+            // Reopen AI container
+            document.getElementById('aiContainer').classList.add('show');
+        });
+        // Upload file function
+        async function uploadFile(file) {
+            if (!sessionId) await initSession();
+            const formData = new FormData();
+            formData.append('session_id', sessionId);
+            formData.append('file', file);
+            showLoading('Uploading file...');
+            try {
+                const response = await fetch(`${API_URL}/api/uploads`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    currentFileName = file.name || 'Screenshot';
+                    document.getElementById('fileName').textContent = currentFileName;
+                    document.getElementById('fileInfo').classList.add('show');
+                    document.getElementById('queryInput').disabled = false;
+                    document.getElementById('sendBtn').disabled = false;
+                    clearEmptyState();
+                    hideLoading();
+                    addMessage('bot', `✅ File "${currentFileName}" uploaded successfully! Ask me anything about it.`);
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            } catch (error) {
+                hideLoading();
+                showError(error.message || 'Upload failed');
+            }
+        }
+        // Send Query
+        async function sendQuery() {
+            const queryInput = document.getElementById('queryInput');
+            const query = queryInput.value.trim();
+            if (!query || !sessionId) return;
+            addMessage('user', query);
+            queryInput.value = '';
+            queryInput.disabled = true;
+            document.getElementById('sendBtn').disabled = true;
+            showLoading('Thinking...');
+            try {
+                const response = await fetch(`${API_URL}/api/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        query: query
+                    })
+                });
+                const data = await response.json();
+                hideLoading();
+                if (response.ok) {
+                    lastBotResponse = data.response;
+                    addMessage('bot', formatMarkdown(data.response));
+                    document.getElementById('speakerBtn').disabled = false;
+                    // Auto speak response
+                    if (synthesis && window.innerWidth < 769) { // Auto TTS on mobile
+                        setTimeout(() => {
+                            const utterance = new SpeechSynthesisUtterance(lastBotResponse);
+                            synthesis.speak(utterance);
+                        }, 500);
+                    }
+                } else {
+                    throw new Error(data.error || 'Query failed');
+                }
+            } catch (error) {
+                hideLoading();
+                showError(error.message || 'Query failed');
+            } finally {
+                queryInput.disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                queryInput.focus();
+            }
+        }
+        document.getElementById('sendBtn').addEventListener('click', sendQuery);
+        document.getElementById('queryInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendQuery();
+        });
+        // Speech to Text - Google-like
+        if (recognition) {
+            document.getElementById('micBtn').addEventListener('click', () => {
+                const micBtn = document.getElementById('micBtn');
+                if (micBtn.classList.contains('recording')) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                    micBtn.classList.add('recording');
+                }
+            });
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+                document.getElementById('queryInput').value = transcript;
+                sendQuery();
+            };
+            recognition.onend = () => {
+                document.getElementById('micBtn').classList.remove('recording');
+            };
+            recognition.onerror = (event) => {
+                showError('Speech recognition error: ' + event.error);
+                document.getElementById('micBtn').classList.remove('recording');
+            };
+        } else {
+            document.getElementById('micBtn').disabled = true;
+            document.getElementById('micBtn').title = 'Speech recognition not supported';
+        }
+        // Text to Speech - Enhanced with auto on mobile
+        document.getElementById('speakerBtn').addEventListener('click', () => {
+            if (synthesis && lastBotResponse) {
+                const utterance = new SpeechSynthesisUtterance(lastBotResponse);
+                utterance.rate = 0.9; // Natural speed like Google
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                synthesis.speak(utterance);
+            }
+        });
+        // Clear Chat
+        document.getElementById('clearBtn').addEventListener('click', async () => {
+            if (!sessionId) return;
+            try {
+                await fetch(`${API_URL}/api/history/clear`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+                document.getElementById('messagesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <h4>Chat Cleared!</h4>
+                        <p>Upload a new document to continue</p>
+                    </div>
+                `;
+                document.getElementById('queryInput').disabled = true;
+                document.getElementById('sendBtn').disabled = true;
+                document.getElementById('speakerBtn').disabled = true;
+                document.getElementById('fileInfo').classList.remove('show');
+                currentFileName = null;
+                lastBotResponse = '';
+            } catch (error) {
+                showError('Failed to clear history');
+            }
+        });
+        // Format Markdown - Enhanced
+        function formatMarkdown(text) {
+            // Headers
+            text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            // Bold and Italic
+            text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // Code blocks
+            text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+            // Lists
+            text = text.replace(/^(\s*[-*+] )(.*$)/gim, '<li>$2</li>');
+            text = text.replace(/<li>([\s\S]*?)<\/li>/g, '<ul>$&</ul>'); // Simple UL wrap
+            // Line breaks to BR
+            text = text.replace(/\n\n/g, '</p><p>');
+            text = text.replace(/\n/g, '<br>');
+            text = text.replace(/<p><br>/g, '<p>');
+            // Wrap in P if needed
+            if (!text.startsWith('<')) text = `<p>${text}</p>`;
+            return text;
+        }
+        // UI Helper Functions - GPT-like
+        function addMessage(role, content) {
+            clearEmptyState();
+            const container = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            messageDiv.innerHTML = `
+                <div class="message-avatar ${role}-avatar">
+                    ${role === 'user' ? 'U' : 'AI'}
+                </div>
+                <div class="message-content">${content}</div>
+            `;
+            container.appendChild(messageDiv);
+            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }); // Smooth scroll like GPT
+        }
+        function showLoading(text) {
+            clearEmptyState();
+            const container = document.getElementById('messagesContainer');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.id = 'loadingIndicator';
+            loadingDiv.innerHTML = `
+                <div class="spinner"></div>
+                <span>${text}</span>
+            `;
+            container.appendChild(loadingDiv);
+            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        }
+        function hideLoading() {
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) loading.remove();
+        }
+        function showError(message) {
+            clearEmptyState();
+            const container = document.getElementById('messagesContainer');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `⚠️ ${message}`;
+            container.appendChild(errorDiv);
+            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+        function clearEmptyState() {
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+        }
+        // Prevent body scroll when AI is open on mobile
+        document.getElementById('aiContainer').addEventListener('touchmove', (e) => {
+            if (window.innerWidth < 769) e.stopPropagation();
+        }, { passive: false });
+    </script>
 </body>
 </html>
