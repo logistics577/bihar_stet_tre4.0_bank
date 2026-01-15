@@ -220,7 +220,7 @@ const errorMsg = document.getElementById("errorMsg");
 const createBtn = document.getElementById("createBtn");
 const uploadBtn = document.getElementById("uploadBtn");
 let images = [];
-let pdfBlob = null; // Store the generated PDF
+let pdfBlob = null;
 
 fileInput.addEventListener("change", () => {
   errorMsg.style.display = "none";
@@ -264,6 +264,27 @@ function rotate(index) {
   document.getElementById(`img-${index}`).style.transform = `rotate(${images[index].rotation}deg)`;
 }
 
+// Compress image function
+function compressImage(imgElement, maxWidth, quality) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  let width = imgElement.width;
+  let height = imgElement.height;
+  
+  // Resize if needed
+  if (width > maxWidth) {
+    height = (height * maxWidth) / width;
+    width = maxWidth;
+  }
+  
+  canvas.width = width;
+  canvas.height = height;
+  ctx.drawImage(imgElement, 0, 0, width, height);
+  
+  return canvas.toDataURL('image/jpeg', quality);
+}
+
 async function createPDF() {
   if (images.length === 0) {
     errorMsg.innerText = "No images selected. Please upload at least one image.";
@@ -283,91 +304,158 @@ async function createPDF() {
   const successMsg = document.getElementById("successMsg");
   const progressFill = document.getElementById("progressFill");
   
-  // Disable create button
   createBtn.disabled = true;
   uploadBtn.style.display = "none";
   
   progressBox.style.display = "block";
   successMsg.style.display = "none";
   errorMsg.style.display = "none";
-  progressText.innerText = "Creating PDF...";
+  progressText.innerText = "Compressing images...";
   progressFill.style.width = "0%";
   
+  const MAX_PDF_SIZE = 3 * 1024 * 1024; // Target 3MB max
+  const ABSOLUTE_MAX = 5 * 1024 * 1024; // Hard limit 5MB
+  
   try {
-    const pdf = new jsPDF();
+    let quality = 0.8;
+    let maxWidth = 1600;
+    let attempt = 0;
+    let finalPdf = null;
     
-    for (let i = 0; i < images.length; i++) {
-      const img = images[i];
-      progressFill.style.width = `${((i + 1) / images.length) * 100}%`;
+    // Try different compression levels
+    while (attempt < 5) {
+      progressText.innerText = `Optimizing PDF (attempt ${attempt + 1})...`;
       
-      // Load image
-      const imgElement = new Image();
-      imgElement.src = img.src;
-      await new Promise(resolve => {
-        imgElement.onload = resolve;
-      });
+      const pdf = new jsPDF();
       
-      // Get PDF dimensions
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      // Calculate image dimensions
-      let imgWidth = imgElement.width;
-      let imgHeight = imgElement.height;
-      
-      // Handle rotation
-      const rotation = img.rotation % 360;
-      if (rotation === 90 || rotation === 270) {
-        [imgWidth, imgHeight] = [imgHeight, imgWidth];
-      }
-      
-      // Calculate scaling to fit page
-      const scale = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const finalWidth = imgWidth * scale;
-      const finalHeight = imgHeight * scale;
-      
-      // Center image on page
-      const x = (pdfWidth - finalWidth) / 2;
-      const y = (pdfHeight - finalHeight) / 2;
-      
-      // Add new page if not first image
-      if (i > 0) {
-        pdf.addPage();
-      }
-      
-      // Add image with rotation
-      if (rotation !== 0) {
-        pdf.saveGraphicsState();
-        pdf.setGState(pdf.GState({ opacity: 1 }));
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        progressFill.style.width = `${((i + 1) / images.length) * 70}%`;
         
-        const centerX = pdfWidth / 2;
-        const centerY = pdfHeight / 2;
+        // Load original image
+        const imgElement = new Image();
+        imgElement.src = img.src;
+        await new Promise(resolve => {
+          imgElement.onload = resolve;
+        });
         
-        pdf.internal.write('q');
-        pdf.internal.write(`1 0 0 1 ${centerX} ${centerY} cm`);
-        pdf.internal.write(`${Math.cos(rotation * Math.PI / 180)} ${Math.sin(rotation * Math.PI / 180)} ${-Math.sin(rotation * Math.PI / 180)} ${Math.cos(rotation * Math.PI / 180)} 0 0 cm`);
-        pdf.internal.write(`1 0 0 1 ${-centerX} ${-centerY} cm`);
+        // Compress image
+        const compressedSrc = compressImage(imgElement, maxWidth, quality);
+        
+        // Load compressed image
+        const compressedImg = new Image();
+        compressedImg.src = compressedSrc;
+        await new Promise(resolve => {
+          compressedImg.onload = resolve;
+        });
+        
+        // Get PDF dimensions
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        // Calculate image dimensions
+        let imgWidth = compressedImg.width;
+        let imgHeight = compressedImg.height;
+        
+        // Handle rotation
+        const rotation = img.rotation % 360;
+        if (rotation === 90 || rotation === 270) {
+          [imgWidth, imgHeight] = [imgHeight, imgWidth];
+        }
+        
+        // Calculate scaling to fit page
+        const scale = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const finalWidth = imgWidth * scale;
+        const finalHeight = imgHeight * scale;
+        
+        // Center image on page
+        const x = (pdfWidth - finalWidth) / 2;
+        const y = (pdfHeight - finalHeight) / 2;
+        
+        // Add new page if not first image
+        if (i > 0) {
+          pdf.addPage();
+        }
+        
+        // Add image with rotation
+        if (rotation !== 0) {
+          pdf.saveGraphicsState();
+          pdf.setGState(pdf.GState({ opacity: 1 }));
+          
+          const centerX = pdfWidth / 2;
+          const centerY = pdfHeight / 2;
+          
+          pdf.internal.write('q');
+          pdf.internal.write(`1 0 0 1 ${centerX} ${centerY} cm`);
+          pdf.internal.write(`${Math.cos(rotation * Math.PI / 180)} ${Math.sin(rotation * Math.PI / 180)} ${-Math.sin(rotation * Math.PI / 180)} ${Math.cos(rotation * Math.PI / 180)} 0 0 cm`);
+          pdf.internal.write(`1 0 0 1 ${-centerX} ${-centerY} cm`);
+        }
+        
+        pdf.addImage(compressedSrc, 'JPEG', x, y, finalWidth, finalHeight);
+        
+        if (rotation !== 0) {
+          pdf.internal.write('Q');
+          pdf.restoreGraphicsState();
+        }
       }
       
-      pdf.addImage(img.src, 'JPEG', x, y, finalWidth, finalHeight);
+      progressFill.style.width = "80%";
       
-      if (rotation !== 0) {
-        pdf.internal.write('Q');
-        pdf.restoreGraphicsState();
+      // Generate PDF
+      const tempBlob = pdf.output('blob');
+      const pdfSize = tempBlob.size;
+      
+      progressText.innerText = `PDF size: ${(pdfSize / 1024).toFixed(2)} KB`;
+      
+      // Check if size is acceptable
+      if (pdfSize <= MAX_PDF_SIZE) {
+        finalPdf = tempBlob;
+        break;
+      } else if (pdfSize <= ABSOLUTE_MAX) {
+        finalPdf = tempBlob;
+        if (attempt === 4) break; // Last attempt, use this
+      }
+      
+      // Adjust compression for next attempt
+      if (pdfSize > MAX_PDF_SIZE) {
+        quality -= 0.15;
+        maxWidth -= 200;
+        
+        if (quality < 0.3) quality = 0.3;
+        if (maxWidth < 800) maxWidth = 800;
+      }
+      
+      attempt++;
+      
+      if (attempt >= 5 && !finalPdf) {
+        finalPdf = tempBlob;
       }
     }
     
-    // Generate PDF as Blob
-    pdfBlob = pdf.output('blob');
+    pdfBlob = finalPdf;
     
     progressText.innerText = "PDF Created!";
     progressFill.style.width = "100%";
     
-    const fileSize = (pdfBlob.size / 1024).toFixed(2);
-    successMsg.innerHTML = `✅ PDF created successfully! (${fileSize} KB)`;
+    const fileSize = pdfBlob.size;
+    const fileSizeKB = (fileSize / 1024).toFixed(2);
+    const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+    
+    let sizeDisplay = fileSize < 1024 * 1024 ? `${fileSizeKB} KB` : `${fileSizeMB} MB`;
+    
+    if (fileSize > ABSOLUTE_MAX) {
+      successMsg.innerHTML = `⚠️ PDF created but exceeds 5MB limit (${sizeDisplay}). Consider using fewer or smaller images.`;
+      successMsg.style.color = '#f59e0b';
+    } else if (fileSize > MAX_PDF_SIZE) {
+      successMsg.innerHTML = `✅ PDF created successfully! (${sizeDisplay}) - Slightly larger than target but within limits.`;
+      successMsg.style.color = '#10b981';
+    } else {
+      successMsg.innerHTML = `✅ PDF created successfully! (${sizeDisplay})`;
+      successMsg.style.color = '#10b981';
+    }
+    
     successMsg.style.display = "block";
     
-    // Enable upload button
     uploadBtn.style.display = "block";
     uploadBtn.disabled = false;
     
@@ -391,7 +479,6 @@ async function uploadPDF() {
   const successMsg = document.getElementById("successMsg");
   const progressFill = document.getElementById("progressFill");
   
-  // Disable upload button
   uploadBtn.disabled = true;
   
   progressBox.style.display = "block";
@@ -436,7 +523,6 @@ async function uploadPDF() {
       successMsg.innerHTML = `✅ ${data.message || 'PDF uploaded successfully!'}${fileSize}${downloadLink}`;
       successMsg.style.display = "block";
       
-      // Reset for new upload
       setTimeout(() => {
         resetForm();
       }, 2000);
