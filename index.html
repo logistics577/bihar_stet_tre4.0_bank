@@ -416,10 +416,11 @@
         }
         .urls-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(3, 1fr); /* desktop default */
             gap: 15px;
             margin-top: 20px;
         }
+
         .url-card {
             background: white;
             border: 2px solid #ecf0f1;
@@ -520,9 +521,13 @@
                 margin-bottom: 5px;
             }
             .files-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* desktop default */
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+
             .urls-grid {
                 grid-template-columns: 1fr;
                 gap: 10px;
@@ -1107,7 +1112,53 @@
     word-break: break-all;
 }
 
-        }
+}
+
+/* ===== FILE GRID RESPONSIVE FIX ===== */
+
+/* Desktop / Laptop */
+@media (min-width: 1200px) {
+    .files-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .files-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .files-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ===== URL GRID RESPONSIVE FIX ===== */
+
+/* Desktop / Laptop */
+@media (min-width: 1200px) {
+    .urls-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .urls-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .urls-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
     </style>
 </head>
 <body>
