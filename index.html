@@ -2232,42 +2232,99 @@ document.getElementById('uploadFile').addEventListener('change', function () {
         document.getElementById('fullPageBtn').addEventListener('click', async () => {
             await autoFullPageCapture();
         });
-        async function autoFullPageCapture() {
-            const modal = document.getElementById('captureModal');
-            modal.style.display = 'none';
-            document.body.style.cursor = 'wait';
-            try {
-                const fullCanvas = await html2canvas(document.body, {
-                    scale: window.devicePixelRatio,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: null,
-                    logging: false
-                });
-                fullCanvas.toBlob(async (blob) => {
-                    if (blob) {
-                        const file = new File([blob], `full-page-screenshot-${Date.now()}.png`, { type: 'image/png' });
-                        // Show in chat
+        // async function autoFullPageCapture() {
+        //     const modal = document.getElementById('captureModal');
+        //     modal.style.display = 'none';
+        //     document.body.style.cursor = 'wait';
+        //     try {
+        //         const fullCanvas = await html2canvas(document.body, {
+        //             scale: window.devicePixelRatio,
+        //             useCORS: true,
+        //             allowTaint: true,
+        //             backgroundColor: null,
+        //             logging: false
+        //         });
+        //         fullCanvas.toBlob(async (blob) => {
+        //             if (blob) {
+        //                 const file = new File([blob], `full-page-screenshot-${Date.now()}.png`, { type: 'image/png' });
+        //                 // Show in chat
+        //                 const reader = new FileReader();
+        //                 reader.onload = (e) => {
+        //                     addMessage('user', `<img src="${e.target.result}" style="max-width: 100%; border-radius: 8px;" alt="Full Page Screenshot">`);
+        //                 };
+        //                 reader.readAsDataURL(file);
+        //                 await uploadFile(file);
+        //                 // Reopen AI container after upload
+        //                 document.getElementById('aiContainer').classList.add('show');
+        //             } else {
+        //                 showError('Failed to create image blob');
+        //             }
+        //         }, 'image/png', 0.95);
+        //     } catch (error) {
+        //         showError('Full page capture failed: ' + error.message);
+        //     } finally {
+        //         document.body.style.cursor = 'default';
+        //         modal.classList.remove('show');
+        //         document.getElementById('captureArea').style.display = 'none';
+        //     }
+        // }
+
+            async function autoFullPageCapture() {
+                const modal = document.getElementById('captureModal');
+                modal.style.display = 'none';
+                document.body.style.cursor = 'wait';
+
+                try {
+                    const isMobile = window.innerWidth < 769;
+
+                    const options = isMobile
+                        ? {
+                            x: window.scrollX,
+                            y: window.scrollY,
+                            width: window.innerWidth,
+                            height: window.innerHeight,
+                            scale: window.devicePixelRatio || 1,
+                            useCORS: true,
+                            backgroundColor: null
+                        }
+                        : {
+                            scale: window.devicePixelRatio || 1,
+                            useCORS: true,
+                            backgroundColor: null
+                        };
+
+                    const canvas = await html2canvas(document.body, options);
+
+                    canvas.toBlob(async (blob) => {
+                        if (!blob) return;
+
+                        const file = new File(
+                            [blob],
+                            `screenshot-${Date.now()}.png`,
+                            { type: 'image/png' }
+                        );
+
+                        // Show preview in chat
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            addMessage('user', `<img src="${e.target.result}" style="max-width: 100%; border-radius: 8px;" alt="Full Page Screenshot">`);
+                            addMessage(
+                                'user',
+                                `<img src="${e.target.result}" style="max-width:100%;border-radius:8px;">`
+                            );
                         };
                         reader.readAsDataURL(file);
+
                         await uploadFile(file);
-                        // Reopen AI container after upload
                         document.getElementById('aiContainer').classList.add('show');
-                    } else {
-                        showError('Failed to create image blob');
-                    }
-                }, 'image/png', 0.95);
-            } catch (error) {
-                showError('Full page capture failed: ' + error.message);
-            } finally {
-                document.body.style.cursor = 'default';
-                modal.classList.remove('show');
-                document.getElementById('captureArea').style.display = 'none';
+                    });
+
+                } catch (err) {
+                    showError('Screenshot failed: ' + err.message);
+                } finally {
+                    document.body.style.cursor = 'default';
+                }
             }
-        }
+
         async function performCapture() {
             const modal = document.getElementById('captureModal');
             const captureArea = document.getElementById('captureArea');
