@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Help System</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+        }
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+/* Floating AI Help Button */
+.ai-help-button {
+position: fixed;
+bottom: 30px;
+right: 30px;
+width: 60px;
+height: 60px;
+border-radius: 50%;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+border: none;
+cursor: pointer;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+z-index: 9999;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+transition: all 0.3s ease;
+        }
+.ai-help-button:hover {
+transform: scale(1.1);
+box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+.ai-help-button.hidden {
+display: none;
+        }
+/* Main Container */
+.ai-container {
+position: fixed;
+bottom: 100px;
+right: 30px;
+width: 450px;
+height: 650px;
+background: white;
+border-radius: 20px;
+box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+display: none;
+flex-direction: column;
+z-index: 9998;
+transition: all 0.3s ease;
+animation: slideUp 0.3s ease;
+        }
+@keyframes slideUp {
+            from {
+opacity: 0;
+transform: translateY(20px);
+            }
+            to {
+opacity: 1;
+transform: translateY(0);
+            }
+        }
+.ai-container.show {
+display: flex;
+        }
+.header {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+padding: 15px 20px;
+border-radius: 20px 20px 0 0;
+display: flex;
+justify-content: space-between;
+align-items: center;
+        }
+.header h3 {
+font-size: 18px;
+display: flex;
+align-items: center;
+gap: 8px;
+        }
+.close-btn {
+background: rgba(255,255,255,0.2);
+border: none;
+color: white;
+width: 30px;
+height: 30px;
+border-radius: 50%;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s;
+        }
+.close-btn:hover {
+background: rgba(255,255,255,0.3);
+transform: rotate(90deg);
+        }
+.upload-section {
+padding: 15px;
+background: #f8f9fa;
+border-bottom: 1px solid #e9ecef;
+        }
+.upload-options {
+display: flex;
+gap: 10px;
+margin-bottom: 10px;
+        }
+.upload-btn {
+flex: 1;
+padding: 10px;
+border: 2px solid #667eea;
+background: white;
+border-radius: 8px;
+cursor: pointer;
+transition: all 0.3s;
+font-size: 12px;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 5px;
+        }
+.upload-btn:hover {
+background: #f8f9ff;
+border-color: #764ba2;
+        }
+.upload-btn.active {
+background: #667eea;
+color: white;
+        }
+.upload-btn svg {
+width: 24px;
+height: 24px;
+        }
+input[type="file"] {
+display: none;
+        }
+.file-info {
+padding: 8px;
+background: #d4edda;
+border-radius: 6px;
+font-size: 12px;
+color: #155724;
+display: none;
+align-items: center;
+gap: 5px;
+        }
+.file-info.show {
+display: flex;
+        }
+/* Screen Capture Modal */
+.capture-modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.8);
+display: none;
+z-index: 10000;
+        }
+.capture-modal.show {
+display: block;
+        }
+.capture-area {
+position: absolute;
+border: 2px dashed #667eea;
+background: rgba(102, 126, 234, 0.1);
+cursor: crosshair;
+display: none;
+        }
+.capture-controls {
+position: fixed;
+bottom: 30px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 15px;
+background: white;
+padding: 15px;
+border-radius: 10px;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+/* Chat Section */
+.chat-section {
+flex: 1;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+        }
+.messages-container {
+flex: 1;
+overflow-y: auto;
+padding: 15px;
+background: #fff;
+        }
+.message {
+margin-bottom: 15px;
+display: flex;
+gap: 10px;
+        }
+.message-avatar {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+font-weight: bold;
+color: white;
+flex-shrink: 0;
+        }
+.user-avatar {
+background: #667eea;
+        }
+.bot-avatar {
+background: #28a745;
+        }
+.message-content {
+flex: 1;
+background: #f8f9fa;
+padding: 10px;
+border-radius: 12px;
+font-size: 14px;
+line-height: 1.6;
+        }
+/* Markdown Styles */
+.message-content h1 {
+font-size: 1.5em;
+margin: 10px 0;
+color: #333;
+        }
+.message-content h2 {
+font-size: 1.3em;
+margin: 8px 0;
+color: #444;
+        }
+.message-content h3 {
+font-size: 1.1em;
+margin: 6px 0;
+color: #555;
+        }
+.message-content strong,
+.message-content b {
+font-weight: bold;
+color: #222;
+        }
+.message-content em,
+.message-content i {
+font-style: italic;
+        }
+.message-content code {
+background: #e9ecef;
+padding: 2px 6px;
+border-radius: 3px;
+font-family: 'Courier New', monospace;
+font-size: 0.9em;
+        }
+.message-content pre {
+background: #2d2d2d;
+color: #f8f8f2;
+padding: 10px;
+border-radius: 6px;
+overflow-x: auto;
+margin: 10px 0;
+        }
+.message-content ul,
+.message-content ol {
+margin: 8px 0;
+padding-left: 20px;
+        }
+.message-content li {
+margin: 4px 0;
+        }
+.message-content blockquote {
+border-left: 4px solid #667eea;
+padding-left: 15px;
+margin: 10px 0;
+color: #666;
+font-style: italic;
+        }
+.message.user .message-content {
+background: #e7f3ff;
+        }
+.empty-state {
+text-align: center;
+padding: 40px 20px;
+color: #6c757d;
+        }
+.empty-state svg {
+width: 60px;
+height: 60px;
+margin-bottom: 15px;
+opacity: 0.5;
+        }
+/* Input Section */
+.input-section {
+padding: 15px;
+background: #f8f9fa;
+border-top: 1px solid #e9ecef;
+border-radius: 0 0 20px 20px;
+        }
+.input-wrapper {
+display: flex;
+gap: 10px;
+align-items: center;
+        }
+#queryInput {
+flex: 1;
+padding: 10px 15px;
+border: 2px solid #dee2e6;
+border-radius: 20px;
+font-size: 14px;
+outline: none;
+transition: all 0.3s;
+        }
+#queryInput:focus {
+border-color: #667eea;
+        }
+.send-btn {
+padding: 10px 15px;
+border: none;
+border-radius: 20px;
+background: #667eea;
+color: white;
+cursor: pointer;
+transition: all 0.3s;
+display: flex;
+align-items: center;
+justify-content: center;
+        }
+.send-btn:hover {
+background: #5568d3;
+        }
+.send-btn:disabled {
+background: #ccc;
+cursor: not-allowed;
+        }
+.loading {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px;
+background: #fff3cd;
+border-radius: 8px;
+margin-bottom: 10px;
+        }
+.spinner {
+width: 16px;
+height: 16px;
+border: 2px solid #f3f3f3;
+border-top: 2px solid #667eea;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+        }
+@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+.error {
+background: #f8d7da;
+color: #721c24;
+padding: 10px;
+border-radius: 8px;
+margin-bottom: 10px;
+font-size: 13px;
+        }
+/* Canvas for screenshot */
+#screenshotCanvas {
+display: none;
+        }
+/* Mobile Responsive */
+@media (max-width: 768px) {
+.ai-container {
+width: 100%;
+height: 100%;
+bottom: 0;
+right: 0;
+border-radius: 0;
+max-width: 100%;
+max-height: 100%;
+            }
+        }
+</style>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+<!-- Floating AI Help Button -->
+<button class="ai-help-button" id="aiHelpBtn" title="AI Help">
+        🤖
+</button>
+<!-- Main AI Container -->
+<div class="ai-container" id="aiContainer">
+<div class="header">
+<h3>🤖 AI Document Helper</h3>
+<button class="close-btn" id="closeBtn">✕</button>
+</div>
+<div class="upload-section">
+<div class="upload-options">
+<label class="upload-btn" id="uploadFileBtn">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+<polyline points="14 2 14 8 20 8"></polyline>
+</svg>
+<span>Upload File</span>
+<input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.bmp,.tiff">
+</label>
+<button class="upload-btn" id="screenshotBtn">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+<line x1="7" y1="2" x2="7" y2="22"></line>
+<line x1="17" y1="2" x2="17" y2="22"></line>
+<line x1="2" y1="12" x2="22" y2="12"></line>
+<line x1="2" y1="7" x2="7" y2="7"></line>
+<line x1="2" y1="17" x2="7" y2="17"></line>
+<line x1="17" y1="17" x2="22" y2="17"></line>
+<line x1="17" y1="7" x2="22" y2="7"></line>
+</svg>
+<span>Screenshot</span>
+</button>
+<button class="upload-btn" id="clearBtn">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<polyline points="3 6 5 6 21 6"></polyline>
+<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+</svg>
+<span>Clear</span>
+</button>
+</div>
+<div class="file-info" id="fileInfo">
+<span>📄</span>
+<span id="fileName"></span>
+</div>
+</div>
+<div class="chat-section">
+<div class="messages-container" id="messagesContainer">
+<div class="empty-state">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+</svg>
+<h4>Ready to Help!</h4>
+<p>Upload a document or take a screenshot</p>
+</div>
+</div>
+</div>
+<div class="input-section">
+<div class="input-wrapper">
+<input
+type="text"
+id="queryInput"
+placeholder="Ask about your document..."
+disabled
+>
+<button class="send-btn" id="sendBtn" disabled>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<line x1="22" y1="2" x2="11" y2="13"></line>
+<polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+</svg>
+</button>
+</div>
+</div>
+</div>
+<!-- Screen Capture Modal -->
+<div class="capture-modal" id="captureModal">
+<div class="capture-area" id="captureArea"></div>
+<div class="capture-controls">
+<button class="upload-btn" id="captureBtn" style="padding: 10px 20px;">
+                📸 Capture
+</button>
+<button class="upload-btn" id="cancelCaptureBtn" style="padding: 10px 20px;">
+                ❌ Cancel
+</button>
+</div>
+</div>
+<canvas id="screenshotCanvas"></canvas>
+<script>
+const API_URL = window.location.origin;
+;
+let sessionId = null;
+let selectedFile = null;
+let currentFileName = null;
+let isCapturing = false;
+let startX, startY, endX, endY;
+// Initialize
+async function initSession() {
+try {
+const response = await fetch(`${API_URL}/api/session/create`, {
+method: 'POST'
+                });
+const data = await response.json();
+sessionId = data.session_id;
+console.log('Session created:', sessionId);
+            } catch (error) {
+showError('Failed to initialize session');
+            }
+        }
+// Show/Hide AI Container
+document.getElementById('aiHelpBtn').addEventListener('click', () => {
+const container = document.getElementById('aiContainer');
+const button = document.getElementById('aiHelpBtn');
+container.classList.add('show');
+button.classList.add('hidden');
+if (!sessionId) {
+initSession();
+            }
+        });
+document.getElementById('closeBtn').addEventListener('click', () => {
+const container = document.getElementById('aiContainer');
+const button = document.getElementById('aiHelpBtn');
+container.classList.remove('show');
+button.classList.remove('hidden');
+        });
+// File Upload
+document.getElementById('fileInput').addEventListener('change', async (e) => {
+selectedFile = e.target.files[0];
+if (selectedFile) {
+await uploadFile(selectedFile);
+            }
+        });
+// Screenshot Functionality
+document.getElementById('screenshotBtn').addEventListener('click', async () => {
+if (typeof html2canvas === 'undefined') {
+showError('html2canvas library failed to load. Please refresh the page.');
+return;
+}
+const modal = document.getElementById('captureModal');
+modal.classList.add('show');
+const captureArea = document.getElementById('captureArea');
+captureArea.style.display = 'block';
+captureArea.style.left = '0px';
+captureArea.style.top = '0px';
+captureArea.style.width = '0px';
+captureArea.style.height = '0px';
+isCapturing = false;
+// Remove previous listeners to avoid duplicates
+modal.removeEventListener('mousedown', startCapture);
+modal.removeEventListener('mousemove', updateCapture);
+modal.removeEventListener('mouseup', endCapture);
+modal.addEventListener('mousedown', startCapture);
+modal.addEventListener('mousemove', updateCapture);
+modal.addEventListener('mouseup', endCapture);
+        });
+async function performCapture() {
+const modal = document.getElementById('captureModal');
+const captureArea = document.getElementById('captureArea');
+const rect = captureArea.getBoundingClientRect();
+const left = rect.left;
+const top = rect.top;
+const width = rect.width;
+const height = rect.height;
+if (width < 5 || height < 5) {
+showError('Please select a larger area to capture.');
+return;
+            }
+// Temporarily hide modal to avoid capturing it
+modal.style.display = 'none';
+document.body.style.cursor = 'wait';
+try {
+const fullCanvas = await html2canvas(document.documentElement, {
+scale: window.devicePixelRatio > 1 ? 2 : 1, // Higher DPI for better quality
+useCORS: true,
+allowTaint: true,
+backgroundColor: null, // Preserve transparency if needed
+logging: false,
+width: document.documentElement.scrollWidth,
+height: document.documentElement.scrollHeight
+                });
+const croppedCanvas = document.createElement('canvas');
+const ctx = croppedCanvas.getContext('2d');
+croppedCanvas.width = width;
+croppedCanvas.height = height;
+// Account for scroll position
+const sourceX = window.pageXOffset + left;
+const sourceY = window.pageYOffset + top;
+ctx.drawImage(fullCanvas, sourceX, sourceY, width, height, 0, 0, width, height);
+return new Promise((resolve, reject) => {
+croppedCanvas.toBlob(async (blob) => {
+if (blob) {
+const file = new File([blob], `screenshot-${Date.now()}.png`, { type: 'image/png' });
+try {
+await uploadFile(file);
+resolve();
+} catch (err) {
+reject(err);
+}
+} else {
+reject(new Error('Failed to create image blob'));
+}
+}, 'image/png', 0.95); // High quality
+});
+            } catch (error) {
+console.error('Capture error:', error);
+showError('Screenshot capture failed: ' + (error.message || 'Unknown error. Check console for details.'));
+            } finally {
+document.body.style.cursor = 'default';
+captureArea.style.display = 'none';
+modal.classList.remove('show');
+            }
+        }
+function startCapture(e) {
+if (e.target.closest('.capture-controls')) return;
+isCapturing = true;
+startX = e.clientX;
+startY = e.clientY;
+const captureArea = document.getElementById('captureArea');
+captureArea.style.left = startX + 'px';
+captureArea.style.top = startY + 'px';
+captureArea.style.width = '0px';
+captureArea.style.height = '0px';
+        }
+function updateCapture(e) {
+if (!isCapturing) return;
+endX = e.clientX;
+endY = e.clientY;
+const captureArea = document.getElementById('captureArea');
+const left = Math.min(startX, endX);
+const top = Math.min(startY, endY);
+const width = Math.abs(endX - startX);
+const height = Math.abs(endY - startY);
+if (width > 0 && height > 0) {
+captureArea.style.left = left + 'px';
+captureArea.style.top = top + 'px';
+captureArea.style.width = width + 'px';
+captureArea.style.height = height + 'px';
+            }
+        }
+async function endCapture(e) {
+if (!isCapturing) return;
+isCapturing = false;
+const captureArea = document.getElementById('captureArea');
+const width = parseInt(captureArea.style.width) || 0;
+const height = parseInt(captureArea.style.height) || 0;
+if (width >= 5 && height >= 5) {
+            // Automatically capture and upload
+await performCapture();
+        } else {
+captureArea.style.width = '0px';
+captureArea.style.height = '0px';
+        }
+        }
+document.getElementById('captureBtn').addEventListener('click', async () => {
+await performCapture();
+        });
+document.getElementById('cancelCaptureBtn').addEventListener('click', () => {
+const modal = document.getElementById('captureModal');
+const captureArea = document.getElementById('captureArea');
+modal.classList.remove('show');
+captureArea.style.display = 'none';
+        });
+// Upload file function
+async function uploadFile(file) {
+if (!sessionId) await initSession();
+const formData = new FormData();
+formData.append('session_id', sessionId);
+formData.append('file', file);
+showLoading('Uploading file...');
+try {
+const response = await fetch(`${API_URL}/api/uploads`, {
+method: 'POST',
+body: formData
+                });
+const data = await response.json();
+if (response.ok) {
+currentFileName = file.name || 'Screenshot';
+document.getElementById('fileName').textContent = currentFileName;
+document.getElementById('fileInfo').classList.add('show');
+document.getElementById('queryInput').disabled = false;
+document.getElementById('sendBtn').disabled = false;
+clearEmptyState();
+hideLoading();
+addMessage('bot', `✅ File "${currentFileName}" uploaded successfully!`);
+                } else {
+throw new Error(data.error || 'Upload failed');
+                }
+            } catch (error) {
+hideLoading();
+showError(error.message || 'Upload failed');
+            }
+        }
+// Send Query
+async function sendQuery() {
+const queryInput = document.getElementById('queryInput');
+const query = queryInput.value.trim();
+if (!query || !sessionId) return;
+addMessage('user', query);
+queryInput.value = '';
+queryInput.disabled = true;
+document.getElementById('sendBtn').disabled = true;
+showLoading('Thinking...');
+try {
+const response = await fetch(`${API_URL}/api/query`, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+                    },
+body: JSON.stringify({
+session_id: sessionId,
+query: query
+                    })
+                });
+const data = await response.json();
+hideLoading();
+if (response.ok) {
+addMessage('bot', formatMarkdown(data.response));
+                } else {
+throw new Error(data.error || 'Query failed');
+                }
+            } catch (error) {
+hideLoading();
+showError(error.message || 'Query failed');
+            } finally {
+queryInput.disabled = false;
+document.getElementById('sendBtn').disabled = false;
+queryInput.focus();
+            }
+        }
+document.getElementById('sendBtn').addEventListener('click', sendQuery);
+document.getElementById('queryInput').addEventListener('keypress', (e) => {
+if (e.key === 'Enter') sendQuery();
+        });
+// Clear Chat
+document.getElementById('clearBtn').addEventListener('click', async () => {
+if (!sessionId) return;
+try {
+await fetch(`${API_URL}/api/history/clear`, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+                    },
+body: JSON.stringify({ session_id: sessionId })
+                });
+document.getElementById('messagesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <h4>Chat Cleared!</h4>
+                        <p>Upload a new document to continue</p>
+                    </div>
+                `;
+document.getElementById('queryInput').disabled = true;
+document.getElementById('sendBtn').disabled = true;
+document.getElementById('fileInfo').classList.remove('show');
+currentFileName = null;
+            } catch (error) {
+showError('Failed to clear history');
+            }
+        });
+// Format Markdown
+function formatMarkdown(text) {
+// Headers
+text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+// Bold
+text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+// Italic
+text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+// Code blocks
+text = text.replace(/```(.*?)```/gs, '<pre>$1</pre>');
+text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+// Lists
+text = text.replace(/^\* (.+)/gim, '<li>$1</li>');
+text = text.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+// Line breaks
+text = text.replace(/\n/g, '<br>');
+return text;
+        }
+// UI Helper Functions
+function addMessage(role, content) {
+clearEmptyState();
+const container = document.getElementById('messagesContainer');
+const messageDiv = document.createElement('div');
+messageDiv.className = `message ${role}`;
+messageDiv.innerHTML = `
+                <div class="message-avatar ${role}-avatar">
+${role === 'user' ? 'U' : 'AI'}
+                </div>
+                <div class="message-content">${content}</div>
+            `;
+container.appendChild(messageDiv);
+container.scrollTop = container.scrollHeight;
+        }
+function showLoading(text) {
+clearEmptyState();
+const container = document.getElementById('messagesContainer');
+const loadingDiv = document.createElement('div');
+loadingDiv.className = 'loading';
+loadingDiv.id = 'loadingIndicator';
+loadingDiv.innerHTML = `
+                <div class="spinner"></div>
+                <span>${text}</span>
+            `;
+container.appendChild(loadingDiv);
+container.scrollTop = container.scrollHeight;
+        }
+function hideLoading() {
+const loading = document.getElementById('loadingIndicator');
+if (loading) loading.remove();
+        }
+function showError(message) {
+clearEmptyState();
+const container = document.getElementById('messagesContainer');
+const errorDiv = document.createElement('div');
+errorDiv.className = 'error';
+errorDiv.textContent = `⚠️ ${message}`;
+container.appendChild(errorDiv);
+setTimeout(() => errorDiv.remove(), 5000);
+        }
+function clearEmptyState() {
+const emptyState = document.querySelector('.empty-state');
+if (emptyState) emptyState.remove();
+        }
+</script>
+</body>
+</html>
