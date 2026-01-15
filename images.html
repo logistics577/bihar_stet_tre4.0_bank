@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Images to PDF</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+--primary: #2563eb;
+--bg: #f8fafc;
+--card: #ffffff;
+--border: #e5e7eb;
+--text: #0f172a;
+}
+* {
+box-sizing: border-box;
+font-family: system-ui, -apple-system, sans-serif;
+}
+body {
+margin: 0;
+background: var(--bg);
+color: var(--text);
+}
+header {
+padding: 16px 24px;
+background: white;
+border-bottom: 1px solid var(--border);
+font-size: 20px;
+font-weight: 600;
+}
+.container {
+max-width: 1100px;
+margin: 24px auto;
+padding: 0 16px;
+}
+.card {
+background: var(--card);
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+.upload-box {
+border: 2px dashed var(--border);
+padding: 30px;
+text-align: center;
+border-radius: 10px;
+cursor: pointer;
+}
+.upload-box:hover {
+border-color: var(--primary);
+}
+.upload-box input {
+display: none;
+}
+.error {
+display: none;
+color: #ef4444;
+margin-top: 10px;
+padding: 10px;
+background: #fee2e2;
+border-radius: 6px;
+border-left: 4px solid #ef4444;
+font-size: 14px;
+}
+.preview-area {
+margin-top: 24px;
+max-height: 420px;
+overflow-y: auto;
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+gap: 16px;
+}
+.preview {
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 10px;
+background: #fff;
+}
+.num {
+font-weight: bold;
+text-align: center;
+margin-bottom: 5px;
+color: var(--primary);
+font-size: 14px;
+}
+.preview img {
+width: 100%;
+height: 220px;
+object-fit: contain;
+transform-origin: center;
+}
+.preview button {
+width: 100%;
+margin-top: 8px;
+padding: 6px;
+border: none;
+border-radius: 6px;
+background: var(--primary);
+color: white;
+cursor: pointer;
+}
+.form-group {
+margin-top: 20px;
+}
+.form-group label {
+display: block;
+font-weight: 500;
+margin-bottom: 6px;
+}
+.form-group input {
+width: 100%;
+padding: 10px;
+border-radius: 6px;
+border: 1px solid var(--border);
+}
+.actions {
+margin-top: 24px;
+display: flex;
+gap: 12px;
+justify-content: flex-end;
+}
+.actions button {
+padding: 12px 22px;
+background: var(--primary);
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 16px;
+cursor: pointer;
+transition: all 0.3s;
+}
+.actions button:disabled {
+background: #94a3b8;
+cursor: not-allowed;
+opacity: 0.6;
+}
+.actions button.upload-btn {
+background: #10b981;
+display: none;
+}
+.actions button.upload-btn:disabled {
+background: #94a3b8;
+}
+.progress {
+margin-top: 20px;
+display: none;
+}
+.progress-bar {
+height: 10px;
+background: #e5e7eb;
+border-radius: 20px;
+overflow: hidden;
+}
+.progress-fill {
+height: 100%;
+width: 0%;
+background: var(--primary);
+transition: width 0.3s ease;
+}
+.success {
+margin-top: 20px;
+color: green;
+font-weight: 600;
+display: none;
+}
+.success a {
+color: var(--primary);
+text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<header>Images to PDF</header>
+<div class="container">
+<div class="card">
+<!-- Upload -->
+<label class="upload-box">
+<strong>Upload Files</strong><br/>
+<small>Images (JPG, PNG)</small>
+<input type="file" id="fileInput" multiple accept="image/*">
+</label>
+<!-- Error -->
+<div class="error" id="errorMsg"></div>
+<!-- Preview -->
+<div class="preview-area" id="previewArea"></div>
+<!-- PDF Name -->
+<div class="form-group">
+<label>Final PDF Name</label>
+<input type="text" id="pdfName" placeholder="my-images.pdf" value="my-images.pdf">
+</div>
+<!-- Action -->
+<div class="actions">
+<button id="createBtn" onclick="createPDF()">Create PDF</button>
+<button class="nav-btn" onclick="window.location.href='/'">
+back
+</button>
+<button id="uploadBtn" class="upload-btn" onclick="uploadPDF()">Upload PDF</button>
+</div>
+
+
+<!-- Progress -->
+<div class="progress" id="progressBox">
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+<small id="progressText">Creating PDF...</small>
+</div>
+<!-- Success -->
+<div class="success" id="successMsg">
+✅ PDF created successfully!
+</div>
+</div>
+</div>
+<script>
+const { jsPDF } = window.jspdf;
+const fileInput = document.getElementById("fileInput");
+const previewArea = document.getElementById("previewArea");
+const errorMsg = document.getElementById("errorMsg");
+const createBtn = document.getElementById("createBtn");
+const uploadBtn = document.getElementById("uploadBtn");
+let images = [];
+let pdfBlob = null; // Store the generated PDF
+
+fileInput.addEventListener("change", () => {
+  errorMsg.style.display = "none";
+  const currentIndex = images.length;
+  let invalidCount = 0;
+  const validFiles = [];
+  
+  [...fileInput.files].forEach((file) => {
+    if (file.type.startsWith("image/")) {
+      validFiles.push(file);
+    } else {
+      invalidCount++;
+    }
+  });
+  
+  if (invalidCount > 0) {
+    errorMsg.innerText = `Error: ${invalidCount} non-image file(s) detected and ignored. Only images (JPG, PNG, etc.) are supported.`;
+    errorMsg.style.display = "block";
+  }
+  
+  validFiles.forEach((file, localIndex) => {
+    const globalIndex = currentIndex + localIndex;
+    const reader = new FileReader();
+    reader.onload = () => {
+      images.push({ file: file, src: reader.result, rotation: 0 });
+      const div = document.createElement("div");
+      div.className = "preview";
+      div.innerHTML = `
+        <div class="num">${globalIndex + 1}</div>
+        <img id="img-${globalIndex}" src="${reader.result}">
+        <button onclick="rotate(${globalIndex})">Rotate 90°</button>
+      `;
+      previewArea.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function rotate(index) {
+  images[index].rotation += 90;
+  document.getElementById(`img-${index}`).style.transform = `rotate(${images[index].rotation}deg)`;
+}
+
+async function createPDF() {
+  if (images.length === 0) {
+    errorMsg.innerText = "No images selected. Please upload at least one image.";
+    errorMsg.style.display = "block";
+    return;
+  }
+  
+  const pdfNameInput = document.getElementById("pdfName");
+  if (!pdfNameInput.value.trim()) {
+    errorMsg.innerText = "PDF name is required.";
+    errorMsg.style.display = "block";
+    return;
+  }
+  
+  const progressBox = document.getElementById("progressBox");
+  const progressText = document.getElementById("progressText");
+  const successMsg = document.getElementById("successMsg");
+  const progressFill = document.getElementById("progressFill");
+  
+  // Disable create button
+  createBtn.disabled = true;
+  uploadBtn.style.display = "none";
+  
+  progressBox.style.display = "block";
+  successMsg.style.display = "none";
+  errorMsg.style.display = "none";
+  progressText.innerText = "Creating PDF...";
+  progressFill.style.width = "0%";
+  
+  try {
+    const pdf = new jsPDF();
+    
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i];
+      progressFill.style.width = `${((i + 1) / images.length) * 100}%`;
+      
+      // Load image
+      const imgElement = new Image();
+      imgElement.src = img.src;
+      await new Promise(resolve => {
+        imgElement.onload = resolve;
+      });
+      
+      // Get PDF dimensions
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate image dimensions
+      let imgWidth = imgElement.width;
+      let imgHeight = imgElement.height;
+      
+      // Handle rotation
+      const rotation = img.rotation % 360;
+      if (rotation === 90 || rotation === 270) {
+        [imgWidth, imgHeight] = [imgHeight, imgWidth];
+      }
+      
+      // Calculate scaling to fit page
+      const scale = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const finalWidth = imgWidth * scale;
+      const finalHeight = imgHeight * scale;
+      
+      // Center image on page
+      const x = (pdfWidth - finalWidth) / 2;
+      const y = (pdfHeight - finalHeight) / 2;
+      
+      // Add new page if not first image
+      if (i > 0) {
+        pdf.addPage();
+      }
+      
+      // Add image with rotation
+      if (rotation !== 0) {
+        pdf.saveGraphicsState();
+        pdf.setGState(pdf.GState({ opacity: 1 }));
+        
+        const centerX = pdfWidth / 2;
+        const centerY = pdfHeight / 2;
+        
+        pdf.internal.write('q');
+        pdf.internal.write(`1 0 0 1 ${centerX} ${centerY} cm`);
+        pdf.internal.write(`${Math.cos(rotation * Math.PI / 180)} ${Math.sin(rotation * Math.PI / 180)} ${-Math.sin(rotation * Math.PI / 180)} ${Math.cos(rotation * Math.PI / 180)} 0 0 cm`);
+        pdf.internal.write(`1 0 0 1 ${-centerX} ${-centerY} cm`);
+      }
+      
+      pdf.addImage(img.src, 'JPEG', x, y, finalWidth, finalHeight);
+      
+      if (rotation !== 0) {
+        pdf.internal.write('Q');
+        pdf.restoreGraphicsState();
+      }
+    }
+    
+    // Generate PDF as Blob
+    pdfBlob = pdf.output('blob');
+    
+    progressText.innerText = "PDF Created!";
+    progressFill.style.width = "100%";
+    
+    const fileSize = (pdfBlob.size / 1024).toFixed(2);
+    successMsg.innerHTML = `✅ PDF created successfully! (${fileSize} KB)`;
+    successMsg.style.display = "block";
+    
+    // Enable upload button
+    uploadBtn.style.display = "block";
+    uploadBtn.disabled = false;
+    
+  } catch (error) {
+    progressBox.style.display = "none";
+    createBtn.disabled = false;
+    errorMsg.innerText = 'Error creating PDF: ' + error.message;
+    errorMsg.style.display = "block";
+  }
+}
+
+async function uploadPDF() {
+  if (!pdfBlob) {
+    errorMsg.innerText = "No PDF to upload. Please create a PDF first.";
+    errorMsg.style.display = "block";
+    return;
+  }
+  
+  const progressBox = document.getElementById("progressBox");
+  const progressText = document.getElementById("progressText");
+  const successMsg = document.getElementById("successMsg");
+  const progressFill = document.getElementById("progressFill");
+  
+  // Disable upload button
+  uploadBtn.disabled = true;
+  
+  progressBox.style.display = "block";
+  successMsg.style.display = "none";
+  errorMsg.style.display = "none";
+  progressText.innerText = "Uploading PDF...";
+  progressFill.style.width = "0%";
+  
+  try {
+    const formData = new FormData();
+    const pdfName = document.getElementById("pdfName").value.trim() || 'my-images.pdf';
+    const fileName = pdfName.endsWith('.pdf') ? pdfName : pdfName + '.pdf';
+    
+    formData.append('file', pdfBlob, fileName);
+    formData.append('email', 'anonymous@user.com');
+    
+    progressFill.style.width = "50%";
+    
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    progressFill.style.width = "80%";
+    
+    const responseText = await response.text();
+    let data;
+    
+    try {
+      data = JSON.parse(responseText);
+    } catch (jsonError) {
+      throw new Error(`Invalid response from server: ${responseText || 'Empty response'}`);
+    }
+    
+    if (response.ok) {
+      progressText.innerText = "Upload Complete!";
+      progressFill.style.width = "100%";
+      
+      const fileSize = data.fileSize ? ` (${data.fileSize} KB)` : '';
+      const downloadLink = data.fileUrl ? `<br><a href="${data.fileUrl}" download target="_blank">Download PDF</a>` : '';
+      
+      successMsg.innerHTML = `✅ ${data.message || 'PDF uploaded successfully!'}${fileSize}${downloadLink}`;
+      successMsg.style.display = "block";
+      
+      // Reset for new upload
+      setTimeout(() => {
+        resetForm();
+      }, 2000);
+      
+    } else {
+      throw new Error(data.message || 'Upload failed');
+    }
+    
+  } catch (error) {
+    progressBox.style.display = "none";
+    uploadBtn.disabled = false;
+    errorMsg.innerText = 'Upload Error: ' + error.message;
+    errorMsg.style.display = "block";
+  }
+}
+
+function resetForm() {
+  images = [];
+  pdfBlob = null;
+  previewArea.innerHTML = "";
+  fileInput.value = "";
+  document.getElementById("pdfName").value = "my-images.pdf";
+  createBtn.disabled = false;
+  uploadBtn.style.display = "none";
+  document.getElementById("progressBox").style.display = "none";
+  document.getElementById("successMsg").style.display = "none";
+}
+</script>
+</body>
+</html>
