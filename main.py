@@ -148,24 +148,16 @@ async def last_read_root(request):
         raise web.HTTPInternalServerError()
     
 import os
-from aiofiles import open as aioopen
 from aiohttp import web
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WHITEBOARD_PATH = os.path.join(BASE_DIR, "whiteboard.html")
 
 async def at_last_read_root(request):
-    try:
-        async with aioopen(WHITEBOARD_PATH, "r", encoding="utf-8") as f:
-            return web.Response(
-                text=await f.read(),
-                content_type="text/html"
-            )
-    except FileNotFoundError:
-        return web.Response(
-            text="<h1>whiteboard.html not found</h1>",
-            status=404
-        )
+    if not os.path.exists(WHITEBOARD_PATH):
+        raise web.HTTPNotFound(text="whiteboard.html not found")
+    return web.FileResponse(WHITEBOARD_PATH)
+
 
 async def get_files(request):
     try:
