@@ -146,6 +146,26 @@ async def last_read_root(request):
     except Exception as e:
         logger.error(f"Root page error: {e}")
         raise web.HTTPInternalServerError()
+    
+import os
+from aiofiles import open as aioopen
+from aiohttp import web
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WHITEBOARD_PATH = os.path.join(BASE_DIR, "whiteboard.html")
+
+async def at_last_read_root(request):
+    try:
+        async with aioopen(WHITEBOARD_PATH, "r", encoding="utf-8") as f:
+            return web.Response(
+                text=await f.read(),
+                content_type="text/html"
+            )
+    except FileNotFoundError:
+        return web.Response(
+            text="<h1>whiteboard.html not found</h1>",
+            status=404
+        )
 
 async def get_files(request):
     try:
@@ -1116,6 +1136,7 @@ def create_app():
     app.router.add_post('/api/history/clear', clear_history_handler)
     app.router.add_get('/', read_root)
     app.router.add_get('/images', last_read_root)
+    app.router.add_get('/whiteboard', at_last_read_root)
     app.router.add_get('/api/files', get_files)
     app.router.add_post('/api/upload', upload_file)
     app.router.add_put('/api/files/{file_id}/update', update_file)
