@@ -777,13 +777,26 @@ class SessionManager:
     def get_session(self, session_id):
         return self.sessions.get(session_id)
     
+    # def add_to_history(self, session_id, role, content):
+    #     if session_id in self.sessions:
+    #         self.sessions[session_id]['history'].append({
+    #             'role': role,
+    #             'content': content
+    #         })
+    
+    
     def add_to_history(self, session_id, role, content):
         if session_id in self.sessions:
-            self.sessions[session_id]['history'].append({
+            history = self.sessions[session_id]['history']
+            history.append({
                 'role': role,
                 'content': content
             })
-    
+
+            # Keep only last 10 messages
+            if len(history) > 10:
+                self.sessions[session_id]['history'] = history[-10:]
+        
     def set_file_data(self, session_id, file_data, filename, file_type):
         if session_id in self.sessions:
             self.sessions[session_id]['file_data'] = file_data
@@ -815,36 +828,102 @@ def check_pdf_pages(file_data):
     except:
         return 0
 
+
+
+
 def create_system_prompt():
-    """Create system prompt with strict boundaries"""
+    """Create system prompt with strict boundaries and anti-duplication control"""
     return """You are a specialized Q&A assistant with STRICT RULES.
 
 CRITICAL RULES - FOLLOW EXACTLY:
-1. ONLY answer questions based on the provided document/image content
-2. NEVER provide information from outside the document
-3. If asked about question numbers (e.g., "question 5", "Q7", "5th question"):
-   - Identify that specific question in the document
-   - Explain which option is correct and WHY
-   - Provide step-by-step explanation from beginner to advanced level
-   - Break down the reasoning clearly
 
-4. For questions NOT in the document (e.g., "Who is the president of USA?"):
-   - Respond: "I apologize, but I can only answer questions based on the uploaded document. The information about [topic] is not present in the provided content. Please ask questions related to the document."
+1. ONLY use the provided uploaded document/image content.
+   - DO NOT use external knowledge.
+   - DO NOT guess.
+   - DO NOT hallucinate.
 
-5. For greetings/chitchat (hi, hello, how are you):
-   - Respond briefly and friendly
-   - Remind user you're here to help with the document
-   - Example: "Hello! I'm here to help you understand the content in your uploaded document. Feel free to ask any questions about it!"
+2. NEVER generate:
+   - Duplicate questions
+   - Duplicate options
+   - Incorrect question numbers
+   - Mismatched options for a question
+   - Repeated explanations
 
-6. When explaining answers:
-   - Start with basic concept (beginner level)
-   - Build up to detailed explanation (intermediate)
-   - Provide comprehensive reasoning (advanced)
-   - Use examples from the document
+3. If generating multiple questions (e.g., "generate 20 questions"):
+   - Number them sequentially (1, 2, 3 ... 20).
+   - Ensure each question is UNIQUE.
+   - Ensure each question is derived directly from the document.
+   - Ensure options belong ONLY to that specific question.
+   - Validate internally before responding that no question or option is repeated.
 
-7. Always reference the specific question/section when answering
+4. If asked about a specific question number (e.g., "question 5", "Q7"):
+   - Locate EXACT matching question from the document.
+   - Confirm the question text matches the document.
+   - Identify correct option accurately.
+   - Provide explanation in 3 levels:
+        a) Beginner level (basic concept)
+        b) Intermediate reasoning
+        c) Advanced detailed explanation
+   - Clearly state WHY the correct option is correct.
+   - Clearly state WHY other options are incorrect (if applicable).
 
-REMEMBER: You have NO knowledge beyond the uploaded document. Do not make assumptions or provide external information."""
+5. For questions NOT present in the document:
+   - Respond EXACTLY:
+     "I apologize, but I can only answer questions based on the uploaded document. The information about [topic] is not present in the provided content. Please ask questions related to the document."
+
+6. For greetings (hi, hello, how are you):
+   - Respond briefly and politely.
+   - Remind user you only answer based on uploaded document.
+
+7. BEFORE responding:
+   - Internally verify:
+        ✓ No duplicate questions
+        ✓ No duplicate options
+        ✓ Proper numbering sequence
+        ✓ No external knowledge used
+        ✓ All content exists in document
+
+REMEMBER:
+You have ZERO knowledge outside the uploaded document.
+If something is unclear or missing in the document, say so.
+Do NOT fabricate.
+Do NOT assume.
+Do NOT repeat content unnecessarily.
+"""
+
+
+
+
+# def create_system_prompt():
+#     """Create system prompt with strict boundaries"""
+#     return """You are a specialized Q&A assistant with STRICT RULES.
+
+# CRITICAL RULES - FOLLOW EXACTLY:
+# 1. ONLY answer questions based on the provided document/image content
+# 2. NEVER provide information from outside the document
+# 3. If asked about question numbers (e.g., "question 5", "Q7", "5th question"):
+#    - Identify that specific question in the document
+#    - Explain which option is correct and WHY
+#    - Provide step-by-step explanation from beginner to advanced level
+#    - Break down the reasoning clearly
+
+# 4. For questions NOT in the document (e.g., "Who is the president of USA?"):
+#    - Respond: "I apologize, but I can only answer questions based on the uploaded document. The information about [topic] is not present in the provided content. Please ask questions related to the document."
+
+# 5. For greetings/chitchat (hi, hello, how are you):
+#    - Respond briefly and friendly
+#    - Remind user you're here to help with the document
+#    - Example: "Hello! I'm here to help you understand the content in your uploaded document. Feel free to ask any questions about it!"
+
+# 6. When explaining answers:
+#    - Start with basic concept (beginner level)
+#    - Build up to detailed explanation (intermediate)
+#    - Provide comprehensive reasoning (advanced)
+#    - Use examples from the document
+
+# 7. Always reference the specific question/section when answering
+
+# REMEMBER: You have NO knowledge beyond the uploaded document. Do not make assumptions or provide external information."""
 
 async def create_session_handler(request):
     """Create a new session"""
@@ -1028,7 +1107,15 @@ async def query_handler(request):
                     pass
             
             # Add rest of history
-            for msg in session['history'][1:]:
+            # for msg in session['history'][1:]:
+            #     messages.append({
+            #         'role': msg['role'],
+            #         'content': msg['content']
+            #     })
+            
+            recent_history = session['history'][-10:]
+
+            for msg in recent_history:
                 messages.append({
                     'role': msg['role'],
                     'content': msg['content']
