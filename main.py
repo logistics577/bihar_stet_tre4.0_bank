@@ -1123,7 +1123,7 @@ async def query_handler(request):
         
         # Call Groq API
         completion = groq_client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",  # Use vision model for images
+            model="qwen/qwen3.8-27b",  # Use vision model for images
             messages=messages,
             temperature=0.7,
             max_tokens=2048,
