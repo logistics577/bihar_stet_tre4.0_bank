@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 from groq import Groq
 import psycopg2
 
+
 load_dotenv()   # 👈 THIS loads .env
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
