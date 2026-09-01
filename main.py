@@ -39,13 +39,13 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 # your DB password, and it's what lets the app create/verify its own
 # tables on startup (see init_database() below) without you ever opening
 # the Supabase SQL Editor.
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise RuntimeError(
-        "DATABASE_URL is missing from .env. Get it from Supabase Dashboard "
-        "-> Project Settings -> Database -> Connection string -> URI, put "
-        "your DB password in it, and add it to .env as DATABASE_URL."
-    )
+# DATABASE_URL = os.getenv("DATABASE_URL")
+# if not DATABASE_URL:
+#     raise RuntimeError(
+#         "DATABASE_URL is missing from .env. Get it from Supabase Dashboard "
+#         "-> Project Settings -> Database -> Connection string -> URI, put "
+#         "your DB password in it, and add it to .env as DATABASE_URL."
+#     )
 
 # Create directories
 LOG_DIR.mkdir(exist_ok=True)
