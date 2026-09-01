@@ -571,6 +571,7 @@ async def save_url(request):
         reader = await request.multipart()
         url = None
         title = None
+        email = "anonymous@user.com"
         while True:
             part = await reader.next()
             if part is None:
@@ -579,6 +580,8 @@ async def save_url(request):
                 url = (await part.text()).strip()
             elif part.name == "title":
                 title = (await part.text()).strip()
+            elif part.name == "email":
+                email = (await part.text()).strip()[:180] or email
         
         if not url:
             raise web.HTTPBadRequest(text="url is required")
@@ -619,6 +622,7 @@ async def save_url(request):
                 "url": url,
                 "title": title,
                 "short_code": short_code,
+                "email": email,
                 "created_at": datetime.utcnow().isoformat()
             })
             .execute
@@ -638,7 +642,7 @@ async def get_urls(request):
     try:
         res = await run_supabase_sync(
             supabase.table('urls')
-            .select("id, url, title, short_code, created_at")
+            .select("id, url, title, short_code, email, created_at")
             .order('created_at', desc=True)
             .execute
         )
@@ -760,30 +764,126 @@ async def delete_url(request):
         return json_error(f"Failed to delete URL: {str(e)}", 500)
 
 
+# ────────────────────────────────────────────────
+# AUTH (email + password, Supabase-backed)
+# ────────────────────────────────────────────────
+def hash_password(password: str, salt: str = None) -> tuple[str, str]:
+    """PBKDF2-SHA256 password hash. Returns (hash_hex, salt_hex)."""
+    if salt is None:
+        salt = uuid.uuid4().hex
+    dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 120_000)
+    return dk.hex(), salt
+
+def verify_password(password: str, stored_hash: str, salt: str) -> bool:
+    check, _ = hash_password(password, salt)
+    return check == stored_hash
+
+async def auth_signup(request):
+    try:
+        data = await request.json()
+        email = (data.get('email') or '').strip().lower()[:180]
+        password = data.get('password') or ''
+        name = (data.get('name') or email.split('@')[0]).strip()[:120]
+
+        if not email or '@' not in email:
+            return json_error("Valid email is required", 400)
+        if len(password) < 6:
+            return json_error("Password must be at least 6 characters", 400)
+
+        existing = await run_supabase_sync(
+            supabase.table('users').select("id").eq('email', email).execute
+        )
+        if existing.data:
+            return json_error("An account with this email already exists", 409)
+
+        pw_hash, salt = hash_password(password)
+        result = await run_supabase_sync(
+            supabase.table('users').insert({
+                "email": email,
+                "name": name,
+                "password_hash": pw_hash,
+                "password_salt": salt,
+                "created_at": datetime.utcnow().isoformat(),
+                "is_admin": email == ADMIN_EMAIL
+            }).execute
+        )
+        log_operation("SIGNUP", user_email=email, success=True)
+        return web.json_response({
+            "success": True,
+            "message": "Account created",
+            "user": {"email": email, "name": name, "is_admin": email == ADMIN_EMAIL}
+        })
+    except web.HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Signup failed: {e}", exc_info=True)
+        return json_error("Signup failed", 500)
+
+async def auth_login(request):
+    try:
+        data = await request.json()
+        email = (data.get('email') or '').strip().lower()[:180]
+        password = data.get('password') or ''
+
+        if not email or not password:
+            return json_error("Email and password are required", 400)
+
+        res = await run_supabase_sync(
+            supabase.table('users').select("*").eq('email', email).single().execute
+        )
+        if not res.data:
+            log_operation("LOGIN", user_email=email, success=False, error_message="No such user")
+            return json_error("Invalid email or password", 401)
+
+        user = res.data
+        if not verify_password(password, user['password_hash'], user['password_salt']):
+            log_operation("LOGIN", user_email=email, success=False, error_message="Bad password")
+            return json_error("Invalid email or password", 401)
+
+        token = uuid.uuid4().hex
+        AUTH_TOKENS[token] = email
+        log_operation("LOGIN", user_email=email, success=True)
+        return web.json_response({
+            "success": True,
+            "token": token,
+            "user": {"email": email, "name": user.get('name'), "is_admin": email == ADMIN_EMAIL}
+        })
+    except web.HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login failed: {e}", exc_info=True)
+        return json_error("Invalid email or password", 401)
+
+# in-memory token store (simple session; swap for JWT/redis in production)
+AUTH_TOKENS = {}
+
+async def auth_me(request):
+    token = request.headers.get('X-Auth-Token') or request.query.get('token')
+    email = AUTH_TOKENS.get(token)
+    if not email:
+        return json_error("Not authenticated", 401)
+    return web.json_response({"success": True, "email": email, "is_admin": email == ADMIN_EMAIL})
+
+
 class SessionManager:
     def __init__(self):
         self.sessions = {}
     
-    def create_session(self):
+    def create_session(self, user_email=None):
         session_id = str(uuid.uuid4())
         self.sessions[session_id] = {
             'history': [],
+            'pages': [],          # ordered list of {data, name, type} - "book mode"
+            'current_page': 0,
             'file_data': None,
             'file_name': None,
-            'file_type': None
+            'file_type': None,
+            'user_email': user_email or 'anonymous@user.com'
         }
         return session_id
     
     def get_session(self, session_id):
         return self.sessions.get(session_id)
-    
-    # def add_to_history(self, session_id, role, content):
-    #     if session_id in self.sessions:
-    #         self.sessions[session_id]['history'].append({
-    #             'role': role,
-    #             'content': content
-    #         })
-    
     
     def add_to_history(self, session_id, role, content):
         if session_id in self.sessions:
@@ -796,12 +896,48 @@ class SessionManager:
             # Keep only last 10 messages
             if len(history) > 10:
                 self.sessions[session_id]['history'] = history[-10:]
-        
+
+            # Persist to Supabase so it shows in the user's chat history
+            try:
+                text_content = content if isinstance(content, str) else str(content)
+                supabase.table('chat_history').insert({
+                    "session_id": session_id,
+                    "user_email": self.sessions[session_id].get('user_email', 'anonymous@user.com'),
+                    "role": role,
+                    "content": text_content[:8000],
+                    "file_name": self.sessions[session_id].get('file_name'),
+                    "created_at": datetime.utcnow().isoformat()
+                }).execute()
+            except Exception as e:
+                logger.error(f"chat_history persist failed: {e}")
+
     def set_file_data(self, session_id, file_data, filename, file_type):
         if session_id in self.sessions:
             self.sessions[session_id]['file_data'] = file_data
             self.sessions[session_id]['file_name'] = filename
             self.sessions[session_id]['file_type'] = file_type
+
+    def add_page(self, session_id, file_data, filename, file_type):
+        """Book mode: append a page (screenshot) to the ordered reading queue."""
+        if session_id not in self.sessions:
+            return None
+        session = self.sessions[session_id]
+        page = {'data': file_data, 'name': filename, 'type': file_type}
+        session['pages'].append(page)
+        # keep legacy single-file fields pointed at the newest page for backward compat
+        self.set_file_data(session_id, file_data, filename, file_type)
+        return len(session['pages']) - 1  # index of the page just added
+
+    def set_current_page(self, session_id, index):
+        if session_id not in self.sessions:
+            return False
+        session = self.sessions[session_id]
+        if 0 <= index < len(session['pages']):
+            session['current_page'] = index
+            page = session['pages'][index]
+            self.set_file_data(session_id, page['data'], page['name'], page['type'])
+            return True
+        return False
 
 session_manager = SessionManager()
 
@@ -832,8 +968,8 @@ def check_pdf_pages(file_data):
 
 
 def create_system_prompt():
-    """Create system prompt with strict boundaries and anti-duplication control"""
-    return """You are a specialized Q&A assistant with STRICT RULES.
+    """Corporate/MNC-style helpdesk tone, same strict grounding rules as before."""
+    return """You are a professional AI Knowledge Assistant, deployed as part of an enterprise document-intelligence platform. Respond the way a well-trained corporate support specialist would: courteous, precise, structured, and confident — never casual slang, never over-familiar.
 
 CRITICAL RULES - FOLLOW EXACTLY:
 
@@ -872,75 +1008,59 @@ CRITICAL RULES - FOLLOW EXACTLY:
      "I apologize, but I can only answer questions based on the uploaded document. The information about [topic] is not present in the provided content. Please ask questions related to the document."
 
 6. For greetings (hi, hello, how are you):
-   - Respond briefly and politely.
-   - Remind user you only answer based on uploaded document.
+   - Respond briefly, warmly, and professionally, the way a corporate helpdesk agent would greet a client.
+   - Remind the user you only answer based on the uploaded document.
 
-7. BEFORE responding:
+7. Tone and formatting standards (MNC helpdesk style):
+   - Open with a brief acknowledgement when helpful (e.g., "Certainly," "Understood,").
+   - Use clear headings/bullets for multi-part answers.
+   - Close longer answers with a short, professional offer of further help (e.g., "Let me know if you'd like this explained further.").
+   - Avoid emojis, avoid slang, avoid overly casual phrasing.
+
+8. If the user is reading a multi-page document page-by-page ("book mode"), answer strictly using the CURRENT page shown to you, unless the user explicitly references another page number they've already seen.
+
+9. BEFORE responding:
    - Internally verify:
         ✓ No duplicate questions
         ✓ No duplicate options
         ✓ Proper numbering sequence
         ✓ No external knowledge used
         ✓ All content exists in document
+        ✓ Tone matches a professional enterprise assistant
 
 REMEMBER:
 You have ZERO knowledge outside the uploaded document.
-If something is unclear or missing in the document, say so.
-Do NOT fabricate.
-Do NOT assume.
-Do NOT repeat content unnecessarily.
+If something is unclear or missing in the document, say so professionally.
+Do NOT fabricate. Do NOT assume. Do NOT repeat content unnecessarily.
 """
 
 
-
-
-# def create_system_prompt():
-#     """Create system prompt with strict boundaries"""
-#     return """You are a specialized Q&A assistant with STRICT RULES.
-
-# CRITICAL RULES - FOLLOW EXACTLY:
-# 1. ONLY answer questions based on the provided document/image content
-# 2. NEVER provide information from outside the document
-# 3. If asked about question numbers (e.g., "question 5", "Q7", "5th question"):
-#    - Identify that specific question in the document
-#    - Explain which option is correct and WHY
-#    - Provide step-by-step explanation from beginner to advanced level
-#    - Break down the reasoning clearly
-
-# 4. For questions NOT in the document (e.g., "Who is the president of USA?"):
-#    - Respond: "I apologize, but I can only answer questions based on the uploaded document. The information about [topic] is not present in the provided content. Please ask questions related to the document."
-
-# 5. For greetings/chitchat (hi, hello, how are you):
-#    - Respond briefly and friendly
-#    - Remind user you're here to help with the document
-#    - Example: "Hello! I'm here to help you understand the content in your uploaded document. Feel free to ask any questions about it!"
-
-# 6. When explaining answers:
-#    - Start with basic concept (beginner level)
-#    - Build up to detailed explanation (intermediate)
-#    - Provide comprehensive reasoning (advanced)
-#    - Use examples from the document
-
-# 7. Always reference the specific question/section when answering
-
-# REMEMBER: You have NO knowledge beyond the uploaded document. Do not make assumptions or provide external information."""
-
 async def create_session_handler(request):
-    """Create a new session"""
-    session_id = session_manager.create_session()
+    """Create a new session, optionally tied to a logged-in user's email."""
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    user_email = (data.get('email') or '').strip().lower() or None
+    session_id = session_manager.create_session(user_email=user_email)
     return web.json_response({'session_id': session_id})
 
 async def upload_file_handler(request):
-    """Handle file upload"""
+    """Handle file upload — supports book mode (page = true) so multiple
+    screenshots of the same document get queued as ordered pages instead
+    of overwriting one another."""
     try:
         reader = await request.multipart()
         session_id = None
         file_data = None
         filename = None
-        
+        book_mode = False
+
         async for part in reader:
             if part.name == 'session_id':
                 session_id = await part.text()
+            elif part.name == 'book_mode':
+                book_mode = (await part.text()).strip().lower() in ('1', 'true', 'yes')
             elif part.name == 'file':
                 filename = part.filename
                 file_data = await part.read()
@@ -979,7 +1099,17 @@ async def upload_file_handler(request):
         # Convert to base64
         base64_data = base64.b64encode(file_data).decode('utf-8')
         
-        # Store file data
+        if book_mode:
+            page_index = session_manager.add_page(session_id, base64_data, filename, mime_type)
+            return web.json_response({
+                'status': 'success',
+                'message': f'Page {page_index + 1} ("{filename}") added to reading queue',
+                'file_type': mime_type,
+                'page_index': page_index,
+                'total_pages': len(session['pages'])
+            })
+
+        # Store file data (single-document mode, legacy behaviour)
         session_manager.set_file_data(session_id, base64_data, filename, mime_type)
         
         return web.json_response({
@@ -993,6 +1123,27 @@ async def upload_file_handler(request):
             {'error': f'Upload failed: {str(e)}'},
             status=500
         )
+
+async def set_page_handler(request):
+    """Book mode: jump to a specific page (0-indexed) like turning a page."""
+    try:
+        data = await request.json()
+        session_id = data.get('session_id')
+        index = int(data.get('index', 0))
+        session = session_manager.get_session(session_id)
+        if not session:
+            return web.json_response({'error': 'Invalid session_id'}, status=404)
+        ok = session_manager.set_current_page(session_id, index)
+        if not ok:
+            return web.json_response({'error': 'Page index out of range'}, status=400)
+        return web.json_response({
+            'status': 'success',
+            'current_page': index,
+            'total_pages': len(session['pages']),
+            'file_name': session['file_name']
+        })
+    except Exception as e:
+        return web.json_response({'error': f'Failed to switch page: {str(e)}'}, status=500)
 
 async def query_handler(request):
     """Handle user queries"""
@@ -1106,13 +1257,6 @@ async def query_handler(request):
                 except:
                     pass
             
-            # Add rest of history
-            # for msg in session['history'][1:]:
-            #     messages.append({
-            #         'role': msg['role'],
-            #         'content': msg['content']
-            #     })
-            
             recent_history = session['history'][-10:]
 
             for msg in recent_history:
@@ -1137,7 +1281,9 @@ async def query_handler(request):
         
         return web.json_response({
             'response': response_text,
-            'file_name': session['file_name']
+            'file_name': session['file_name'],
+            'current_page': session.get('current_page', 0),
+            'total_pages': len(session.get('pages', []))
         })
     
     except Exception as e:
@@ -1147,7 +1293,7 @@ async def query_handler(request):
         )
 
 async def get_history_handler(request):
-    """Get conversation history"""
+    """Get conversation history for a live session"""
     session_id = request.match_info.get('session_id')
     
     session = session_manager.get_session(session_id)
@@ -1161,6 +1307,25 @@ async def get_history_handler(request):
         'history': session['history'],
         'file_name': session['file_name']
     })
+
+async def get_user_chat_history(request):
+    """Get a logged-in user's persisted chat history (across sessions/devices)."""
+    email = request.match_info.get('email', '').strip().lower()
+    if not email:
+        return json_error("Email is required", 400)
+    try:
+        res = await run_supabase_sync(
+            supabase.table('chat_history')
+            .select("id, session_id, role, content, file_name, created_at")
+            .eq('user_email', email)
+            .order('created_at', desc=True)
+            .limit(200)
+            .execute
+        )
+        return web.json_response({"success": True, "history": res.data or []})
+    except Exception as e:
+        logger.error(f"get_user_chat_history error: {e}", exc_info=True)
+        return json_error("Failed to load chat history", 500)
 
 async def clear_history_handler(request):
     """Clear conversation history but keep file"""
@@ -1186,8 +1351,8 @@ async def cors_middleware(request, handler):
         response = await handler(request)
     
     response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-Auth-Token'
     return response
 
 async def index_handler(request):
@@ -1206,26 +1371,42 @@ async def index_handler(request):
 
 def create_app():
     app = web.Application(client_max_size=MAX_FILE_SIZE + 2*1024*1024)
+    app.middlewares.append(cors_middleware)
     app.middlewares.append(json_error_middleware)
+
+    # auth
+    app.router.add_post('/api/auth/signup', auth_signup)
+    app.router.add_post('/api/auth/login', auth_login)
+    app.router.add_get('/api/auth/me', auth_me)
+
+    # chatbot
     app.router.add_get('/ai-boat', index_handler)
     app.router.add_post('/api/session/create', create_session_handler)
     app.router.add_post('/api/uploads', upload_file_handler)
+    app.router.add_post('/api/session/page', set_page_handler)
     app.router.add_post('/api/query', query_handler)
     app.router.add_get('/api/history/{session_id}', get_history_handler)
+    app.router.add_get('/api/chat-history/{email}', get_user_chat_history)
     app.router.add_post('/api/history/clear', clear_history_handler)
+
+    # dashboard / pages
     app.router.add_get('/', read_root)
     app.router.add_get('/images', last_read_root)
     app.router.add_get('/whiteboard', at_last_read_root)
+
+    # file manager
     app.router.add_get('/api/files', get_files)
     app.router.add_post('/api/upload', upload_file)
     app.router.add_put('/api/files/{file_id}/update', update_file)
     app.router.add_delete('/api/files/{file_id}/delete', delete_file)
     app.router.add_get('/api/files/{file_id}/download', download_file)
+
+    # urls
     app.router.add_post('/api/save-url', save_url)
     app.router.add_get('/api/urls', get_urls)
     app.router.add_delete('/api/urls/{url_id}/delete', delete_url)
-    # This is the redirect endpoint - when visited, it redirects to the saved URL
     app.router.add_get('/api/url/{url_id}', url_redirect)
+
     logger.info("All routes registered:")
     for r in app.router.routes():
         logger.info(f" {r.method:6} {r.resource.canonical}")
