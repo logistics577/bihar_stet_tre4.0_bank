@@ -1,1622 +1,1437 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Knowledge Library</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --brand-900: #0f1729;
-            --brand-800: #16213a;
-            --brand-700: #1e2b4d;
-            --brand-600: #2d3f6b;
-            --accent: #4f6ef7;
-            --accent-600: #3d59e0;
-            --accent-100: #eef1ff;
-            --success: #16a34a;
-            --success-bg: #ecfdf3;
-            --danger: #e0334f;
-            --danger-bg: #fdecef;
-            --warn: #d97706;
-            --warn-bg: #fff7ed;
-            --ink-900: #101828;
-            --ink-700: #344054;
-            --ink-500: #667085;
-            --ink-300: #d0d5dd;
-            --surface: #ffffff;
-            --surface-muted: #f7f8fb;
-            --border: #e4e7ec;
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 18px;
-            --shadow-sm: 0 1px 2px rgba(16,24,40,.06);
-            --shadow-md: 0 4px 14px rgba(16,24,40,.10);
-            --shadow-lg: 0 16px 40px rgba(16,24,40,.18);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: radial-gradient(circle at 15% 0%, #1c2745 0%, var(--brand-900) 55%);
-            min-height: 100vh;
-            padding: 24px 16px;
-            color: var(--ink-900);
-        }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            background: var(--surface);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,.08);
-        }
-        .navbar {
-            display: flex;
-            background: var(--brand-800);
-            flex-wrap: wrap;
-            padding: 6px;
-            gap: 4px;
-        }
-        .nav-btn {
-            flex: 1;
-            min-width: 110px;
-            padding: 13px 10px;
-            border: none;
-            background: transparent;
-            color: rgba(255,255,255,.65);
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 13.5px;
-            cursor: pointer;
-            transition: all .2s ease;
-            border-radius: var(--radius-sm);
-            text-align: center;
-            white-space: nowrap;
-        }
-        .nav-btn:hover { background: rgba(255,255,255,.06); color: #fff; }
-        .nav-btn.active { background: var(--accent); color: #fff; box-shadow: var(--shadow-sm); }
-        .content { padding: 28px; }
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn .35s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        h1 { color: var(--ink-900); margin-bottom: 20px; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
-        .upload-form, .url-input-form {
-            background: var(--surface-muted);
-            border: 1px solid var(--border);
-            padding: 22px;
-            border-radius: var(--radius-md);
-            margin-bottom: 22px;
-        }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 7px; color: var(--ink-700); font-weight: 600; font-size: 13px; }
-        input[type="email"], input[type="file"], input[type="text"], input[type="url"], textarea {
-            width: 100%;
-            padding: 11px 13px;
-            border: 1.5px solid var(--ink-300);
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-            font-family: inherit;
-            transition: border .2s, box-shadow .2s;
-            background: var(--surface);
-            color: var(--ink-900);
-        }
-        textarea { min-height: 150px; resize: vertical; }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-100);
-        }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            padding: 10px 18px;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 13.5px;
-            transition: all .2s ease;
-            margin-right: 8px;
-            margin-bottom: 8px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn:hover { background: var(--accent-600); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-        .btn:disabled { background: var(--ink-300); cursor: not-allowed; transform: none; box-shadow: none; }
-        .select-btn { background: var(--brand-700); }
-        .select-btn:hover { background: var(--brand-600); }
-        .file-name-preview {
-            margin: 10px 0;
-            font-size: 13.5px;
-            color: var(--ink-700);
-            background: var(--surface);
-            border: 1.5px dashed var(--ink-300);
-            padding: 10px 13px;
-            border-radius: var(--radius-sm);
-            word-break: break-all;
-        }
-        .files-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; }
-        @media (min-width: 768px) and (max-width: 1199px) { .files-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 767px) { .files-grid { grid-template-columns: 1fr; } }
-        .file-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            transition: all .2s ease;
-        }
-        .file-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-3px); }
-        .file-icon { font-size: 36px; text-align: center; margin-bottom: 10px; }
-        .file-name { font-weight: 700; color: var(--ink-900); margin-bottom: 8px; word-break: break-all; font-size: 13.5px; }
-        .file-info { color: var(--ink-500); font-size: 12px; margin-bottom: 4px; }
-        .file-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-        .btn-small { padding: 7px 8px; font-size: 11px; flex: 1; min-width: 50px; margin: 0; }
-        .btn-view { background: var(--success); }
-        .btn-view:hover { background: #128a3e; }
-        .btn-update { background: var(--warn); }
-        .btn-update:hover { background: #b8650a; }
-        .btn-delete { background: var(--danger); }
-        .btn-delete:hover { background: #c02440; }
-        .alert { padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 15px; animation: slideIn .25s ease; font-size: 13.5px; font-weight: 500; }
-        @keyframes slideIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .alert-success { background: var(--success-bg); color: #14622f; border: 1px solid #b6f0c8; }
-        .alert-error { background: var(--danger-bg); color: #8f1d34; border: 1px solid #f6b9c4; }
+import aiohttp.web as web
+import asyncio
+import os
+from datetime import datetime
+import mimetypes
+from aiofiles import open as aioopen
+import logging
+import sys
+import hashlib
+from pathlib import Path
+import re
+from supabase import create_client, Client
+import base64
+import uuid
+import base64
+import PyPDF2
+from io import BytesIO
+from dotenv import load_dotenv
+import os
+from groq import Groq
 
-        /* ===== MODALS ===== */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15,23,41,.55);
-            backdrop-filter: blur(2px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .modal.active { display: flex; }
-        /* default: compact centered dialog (used by update / delete popups) */
-        .modal-content {
-            background: var(--surface);
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 420px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            animation: popIn .2s ease;
-        }
-        @keyframes popIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
-        .modal-content form { padding: 22px; }
-        .modal-header {
-            padding: 16px 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-        .modal-header h2 { color: var(--ink-900); margin: 0; font-size: 16px; font-weight: 700; }
-        .close-btn {
-            background: var(--surface-muted);
-            color: var(--ink-700);
-            border: 1px solid var(--border);
-            margin-left: 6px;
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .close-btn:hover { background: var(--danger-bg); color: var(--danger); border-color: #f6b9c4; }
-        .maximize-btn { background: var(--surface-muted); color: var(--ink-700); border: 1px solid var(--border); }
-        .maximize-btn:hover { background: var(--accent-100); color: var(--accent-600); border-color: var(--accent); }
+load_dotenv()   # 👈 THIS loads .env
 
-        /* file-viewer modal: full-screen variant, opt-in via .modal-fullscreen */
-        .modal-fullscreen .modal-content {
-            max-width: 100vw;
-            width: 100vw;
-            max-height: 100vh;
-            height: 100vh;
-            border-radius: 0;
-            animation: none;
-        }
-        .modal-fullscreen.maximized .modal-content { width: 100vw; height: 100vh; }
-        .modal-fullscreen .modal-header { position: sticky; top: 0; background: var(--surface); z-index: 10; }
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-        .viewer-container {
-            width: 100%;
-            height: calc(100vh - 57px);
-            background: var(--surface-muted);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            overflow-y: auto;
-        }
-        .viewer-container img { max-width: 100%; max-height: 100%; cursor: zoom-in; }
-        .viewer-container canvas { max-width: 100%; cursor: crosshair; display: block; margin: 0 auto 10px; }
-        .viewer-container iframe { width: 100%; height: 100%; border: none; }
-        .viewer-container pre {
-            width: 100%; height: 100%; overflow-y: auto; padding: 18px;
-            background: var(--surface); margin: 0; white-space: pre-wrap; word-wrap: break-word;
-            font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.6;
-        }
-        .pdf-container { width: 100%; height: 100%; overflow-y: auto; padding: 10px; box-sizing: border-box; }
-        .pdf-page { margin-bottom: 10px; text-align: center; }
-        .pdf-page canvas { max-width: 100%; box-shadow: var(--shadow-sm); border-radius: 4px; }
+groq_client = Groq(api_key=GROQ_API_KEY)
 
-        .paste-area {
-            width: 100%; min-height: 250px; border: 2px dashed var(--ink-300); border-radius: var(--radius-md);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; text-align: center; background: var(--surface-muted); cursor: pointer; transition: all .2s;
-        }
-        .paste-area:hover { background: var(--accent-100); border-color: var(--accent); }
-        .paste-area.dragover { background: var(--success-bg); border-color: var(--success); }
-        .paste-icon { font-size: 44px; margin-bottom: 10px; }
-        #paste-section { position: relative; min-height: 500px; }
-        .save-actions {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--surface); padding: 14px 22px; border-radius: var(--radius-md);
-            box-shadow: var(--shadow-lg); z-index: 100; display: none; border: 1px solid var(--border);
-        }
-        .save-actions.active { display: flex; gap: 10px; }
-        .urls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
-        @media (min-width: 768px) and (max-width: 1199px) { .urls-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 767px) { .urls-grid { grid-template-columns: 1fr; } }
-        .url-card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
-            padding: 16px; transition: all .2s;
-        }
-        .url-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-3px); }
-        .url-number { font-size: 17px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
-        .url-link { color: var(--ink-500); font-size: 12px; word-break: break-all; margin-bottom: 10px; }
 
-        @media (max-width: 768px) {
-            body { padding: 8px; }
-            .content { padding: 16px; }
-            h1 { font-size: 19px; }
-            .nav-btn { font-size: 12px; padding: 12px 6px; min-width: 90px; }
-            .btn { padding: 9px 14px; font-size: 12.5px; }
-            .btn-small { padding: 6px 8px; font-size: 10.5px; }
-            .file-card { padding: 12px; }
-            .paste-area { min-height: 200px; padding: 16px; }
-            .save-actions { bottom: 10px; padding: 12px 16px; width: 94%; left: 3%; transform: none; flex-direction: column; gap: 6px; }
+# ────────────────────────────────────────────────
+# CONFIGURATION
+# ────────────────────────────────────────────────
+ADMIN_EMAIL = "zapierobroy77777559977@gmail.com"
+SUPABASE_URL = "https://obnhesobzgppiidigdtu.supabase.co"
+SUPABASE_KEY = "sb_publishable_-zpPTE45VhRROAZOV0xxFg_iTMVSYLA"
+LOG_DIR = Path("logs")
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+# Create directories
+LOG_DIR.mkdir(exist_ok=True)
+
+# Logging setup
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)-7s] %(name)-12s %(funcName)18s:%(lineno)4d → %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler(LOG_DIR / "filemanager.log"),
+        logging.FileHandler(LOG_DIR / "operations.log")
+    ]
+)
+logger = logging.getLogger("filemanager")
+operation_logger = logging.getLogger("operations")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# ────────────────────────────────────────────────
+# HELPERS
+# ────────────────────────────────────────────────
+def safe_filename(original: str) -> str:
+    """Sanitize filename - prevent path traversal & dangerous chars"""
+    name = Path(original).name
+    name = re.sub(r'[^a-zA-Z0-9._\-\u0600-\u06FF\s]', '_', name)
+    if len(name) > 180:
+        base, ext = os.path.splitext(name)
+        name = base[:170] + ext
+    return name
+
+def calculate_file_hash(file_bytes: bytes, algorithm="md5") -> str | None:
+    """Calculate hash from bytes"""
+    try:
+        hasher = hashlib.new(algorithm)
+        hasher.update(file_bytes)
+        return hasher.hexdigest()
+    except Exception as e:
+        logger.error(f"Hash calculation failed: {e}")
+        return None
+
+def log_operation(operation: str, file_id=None, filename=None, user_email=None,
+                  success=True, details=None, error_message=None):
+    try:
+        data = {
+            'operation': operation.upper(),
+            'file_id': file_id,
+            'filename': filename,
+            'user_email': user_email,
+            'operation_time': datetime.utcnow().isoformat(),
+            'details': details,
+            'success': success,
+            'error_message': error_message
         }
+        supabase.table('operations_log').insert(data).execute()
+        msg = f"{operation:8} | {filename or '-':<35} | {user_email or '-':<28} | {'OK' if success else 'FAIL'}"
+        if details: msg += f" | {details}"
+        if error_message: msg += f" | {error_message}"
+        if success:
+            operation_logger.info(msg)
+        else:
+            operation_logger.error(msg)
+    except Exception as e:
+        logger.error(f"Operation logging failed: {e}")
 
-        .loading { text-align: center; padding: 30px; color: var(--ink-500); font-weight: 500; }
-        .empty-state { text-align: center; padding: 44px 10px; color: var(--ink-500); }
-        .empty-state-icon { font-size: 44px; margin-bottom: 14px; opacity: .5; }
-        .mode-selector { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
-        .mode-btn { padding: 9px 14px; font-size: 12.5px; background: var(--surface-muted); color: var(--ink-700); border: 1px solid var(--border); }
-        .mode-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-        .urls-section { padding: 4px; }
-        .url-input-form { display: flex; gap: 12px; flex-wrap: wrap; }
-        .url-input-form input { flex: 1; min-width: 200px; }
-        .extracted-urls { margin-top: 20px; padding: 16px; background: var(--surface-muted); border-radius: var(--radius-sm); border: 1px solid var(--border); }
-        .extracted-urls h4 { margin-bottom: 10px; color: var(--ink-900); font-size: 13.5px; }
-        .extracted-urls ol { margin: 10px 0; padding-left: 20px; }
-        .extracted-urls li { margin-bottom: 5px; font-size: 13px; }
-        .extracted-urls a { color: var(--accent); text-decoration: none; }
-        .extracted-urls a:hover { text-decoration: underline; }
+# Wrapper to run Supabase sync calls in thread (non-blocking)
+async def run_supabase_sync(func, *args, **kwargs):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, lambda: func(*args, **kwargs))
 
-        /* ===== AI Assistant ===== */
-        .ai-help-button {
-            position: fixed; bottom: 28px; right: 28px; width: 60px; height: 60px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent) 0%, #7c5cff 100%);
-            color: #fff; border: none; cursor: pointer; box-shadow: var(--shadow-lg); z-index: 9999;
-            display: none; align-items: center; justify-content: center; transition: all .25s ease;
+# JSON Error Response Helper
+def json_error(message, status=500):
+    return web.json_response({"success": False, "message": message}, status=status)
+
+# ────────────────────────────────────────────────
+# MIDDLEWARE FOR JSON ERRORS
+# ────────────────────────────────────────────────
+async def json_error_middleware(app, handler):
+    async def middleware_handler(request):
+        try:
+            response = await handler(request)
+            return response
+        except web.HTTPException as ex:
+            return json_error(str(ex), ex.status)
+        except Exception as ex:
+            logger.error(f"Unhandled error: {ex}", exc_info=True)
+            return json_error(f"Internal server error: {str(ex)}", 500)
+    return middleware_handler
+
+# ────────────────────────────────────────────────
+# ROUTES - FILES STORED IN SUPABASE DB
+# ────────────────────────────────────────────────
+async def read_root(request):
+    try:
+        async with aioopen("index.html", "r", encoding="utf-8") as f:
+            return web.Response(text=await f.read(), content_type='text/html')
+    except FileNotFoundError:
+        return web.Response(text="<h1>index.html not found</h1>", status=404)
+    except Exception as e:
+        logger.error(f"Root page error: {e}")
+        raise web.HTTPInternalServerError()
+    
+    
+    
+async def last_read_root(request):
+    try:
+        async with aioopen("images.html", "r", encoding="utf-8") as f:
+            return web.Response(text=await f.read(), content_type='text/html')
+    except FileNotFoundError:
+        return web.Response(text="<h1>images.html not found</h1>", status=404)
+    except Exception as e:
+        logger.error(f"Root page error: {e}")
+        raise web.HTTPInternalServerError()
+    
+import os
+from aiohttp import web
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WHITEBOARD_PATH = os.path.join(BASE_DIR, "whiteboard.html")
+
+async def at_last_read_root(request):
+    if not os.path.exists(WHITEBOARD_PATH):
+        raise web.HTTPNotFound(text="whiteboard.html not found")
+    return web.FileResponse(WHITEBOARD_PATH)
+
+
+async def get_files(request):
+    try:
+        res = await run_supabase_sync(
+            supabase.table('files')
+            .select("id, filename, filetype, size, uploaded_at, email, download_count, last_accessed")
+            .eq('status', 'active')
+            .order('uploaded_at', desc=True)
+            .execute
+        )
+        files = res.data or []
+        total_size = sum(f['size'] for f in files)
+        return web.json_response({
+            "success": True,
+            "files": files,
+            "total_files": len(files),
+            "total_size_bytes": total_size
+        })
+    except Exception as e:
+        logger.error(f"get_files error: {e}", exc_info=True)
+        raise
+
+async def upload_file(request):
+    original_name = None
+    email = "anonymous@user.com"
+    try:
+        reader = await request.multipart()
+        file_content = bytearray()
+        while True:
+            part = await reader.next()
+            if part is None:
+                break
+            if part.name == "file":
+                original_name = safe_filename(part.filename)
+                async for chunk in part:
+                    file_content.extend(chunk)
+            elif part.name == "email":
+                email = (await part.text()).strip()[:180]
+        
+        if not original_name or not file_content:
+            log_operation("UPLOAD", user_email=email, success=False, error_message="Missing file")
+            return json_error("File is required", 400)
+        
+        file_size = len(file_content)
+        
+        if file_size == 0:
+            log_operation("UPLOAD", filename=original_name, user_email=email, success=False, error_message="Empty file")
+            return json_error("Empty file not allowed. Please upload a file with content.", 400)
+        
+        if file_size > MAX_FILE_SIZE:
+            log_operation("UPLOAD", filename=original_name, user_email=email, success=False, error_message="File too large")
+            return json_error(f"File too large. Maximum size is {MAX_FILE_SIZE//1024//1024}MB", 413)
+        
+        # Check if file with same name already exists
+        existing = await run_supabase_sync(
+            supabase.table('files')
+            .select("id")
+            .eq('filename', original_name)
+            .eq('status', 'active')
+            .execute
+        )
+        
+        if existing.data:
+            log_operation("UPLOAD", filename=original_name, user_email=email, success=False, error_message="File already exists")
+            return json_error(f"File '{original_name}' already exists. Please rename your file or delete the existing one first.", 409)
+        
+        # Calculate hash
+        file_hash = calculate_file_hash(bytes(file_content))
+        
+        # Encode file content as base64 for storage in PostgreSQL
+        file_b64 = base64.b64encode(bytes(file_content)).decode('utf-8')
+        
+        data = {
+            "filename": original_name,
+            "filetype": Path(original_name).suffix.lstrip('.').upper() or "FILE",
+            "size": file_size,
+            "uploaded_at": datetime.utcnow().isoformat(),
+            "email": email,
+            "md5_hash": file_hash,
+            "last_accessed": datetime.utcnow().isoformat(),
+            "status": "active",
+            "download_count": 0,
+            "file_data": file_b64  # Store base64 encoded file in DB
         }
-        .ai-help-button:hover { transform: scale(1.08); }
-        .ai-help-button.hidden { display: none; }
-        .ai-help-button.visible { display: flex; }
-        .ai-help-button svg { width: 28px; height: 28px; }
+        
+        result = await run_supabase_sync(supabase.table('files').insert(data).execute)
+        file_id = result.data[0]["id"]
+        
+        log_operation("UPLOAD", file_id, original_name, email, True,
+                      f"Size: {file_size:,} Hash: {file_hash}")
+        
+        return web.json_response({
+            "success": True,
+            "message": f"File '{original_name}' uploaded successfully",
+            "id": file_id,
+            "filename": original_name,
+            "size": file_size,
+            "hash": file_hash
+        })
+    except web.HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Upload failed: {e}", exc_info=True)
+        log_operation("UPLOAD", filename=original_name, user_email=email,
+                      success=False, error_message=str(e))
+        raise
 
-        .ai-container {
-            position: fixed; bottom: 0; right: 0; width: 100vw; height: 100vh;
-            background: var(--surface); display: none; flex-direction: column; z-index: 9998;
-            transition: all .25s ease; animation: slideUp .25s ease; overflow: hidden;
-        }
-        @media (min-width: 769px) {
-            .ai-container { bottom: 100px; right: 28px; width: 420px; height: 640px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-        .ai-container.show { display: flex; }
-        .ai-header {
-            background: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-700) 100%);
-            color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 10;
-        }
-        @media (min-width: 769px) { .ai-header { border-radius: var(--radius-lg) var(--radius-lg) 0 0; } }
-        .ai-header h3 { font-size: 15.5px; font-weight: 700; display: flex; align-items: center; gap: 9px; }
-        .ai-header .bot-logo { width: 26px; height: 26px; flex-shrink: 0; }
-        .ai-close-btn {
-            background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff;
-            width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: all .2s; font-size: 15px; flex-shrink: 0;
-        }
-        .ai-close-btn:hover { background: rgba(255,255,255,.28); transform: rotate(90deg); }
-        .upload-section { padding: 13px; background: var(--surface-muted); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .upload-options { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-        .upload-btn {
-            flex: 1; padding: 10px; border: 1.5px solid var(--border); background: var(--surface);
-            border-radius: var(--radius-sm); cursor: pointer; transition: all .2s; font-size: 11.5px;
-            display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 95px; color: var(--ink-700); font-weight: 600;
-        }
-        .upload-btn:hover { background: var(--accent-100); border-color: var(--accent); color: var(--accent-600); }
-        .upload-btn svg { width: 22px; height: 22px; }
-        .ai-container input[type="file"] { display: none; }
-        .file-info { padding: 8px 10px; background: var(--success-bg); border-radius: var(--radius-sm); font-size: 12px; color: #14622f; display: none; align-items: center; gap: 6px; font-weight: 600; }
-        .file-info.show { display: flex; }
-        .capture-modal { position: fixed; inset: 0; background: rgba(15,23,41,.82); display: none; z-index: 10000; }
-        .capture-modal.show { display: block; }
-        .capture-area { position: absolute; border: 2px dashed var(--accent); background: rgba(79,110,247,.12); cursor: crosshair; display: none; }
-        .capture-controls {
-            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px;
-            background: var(--surface); padding: 14px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
-            flex-wrap: wrap; justify-content: center;
-        }
-        @media (max-width: 768px) { .capture-controls { bottom: 10px; width: 94%; left: 3%; transform: none; gap: 8px; } }
-        .chat-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .messages-container { flex: 1; overflow-y: auto; padding: 15px; background: var(--surface); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-        .message { margin-bottom: 15px; display: flex; gap: 10px; animation: fadeInMessage .25s ease; }
-        @keyframes fadeInMessage { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .message-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
-        .user-avatar { background: var(--accent); }
-        .bot-avatar { background: linear-gradient(135deg, var(--brand-900), var(--brand-700)); }
-        .message-content { flex: 1; background: var(--surface-muted); padding: 10px 13px; border-radius: 12px; font-size: 13.5px; line-height: 1.6; max-width: 82%; word-wrap: break-word; }
-        .message-content h1 { font-size: 1.4em; margin: 8px 0; }
-        .message-content h2 { font-size: 1.2em; margin: 7px 0; }
-        .message-content h3 { font-size: 1.05em; margin: 6px 0; }
-        .message-content strong, .message-content b { font-weight: 700; }
-        .message-content code { background: var(--ink-300); padding: 2px 5px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: .88em; }
-        .message-content pre { background: var(--brand-900); color: #e8ebf5; padding: 10px; border-radius: 6px; overflow-x: auto; margin: 8px 0; font-size: .85em; }
-        .message-content ul, .message-content ol { margin: 6px 0; padding-left: 18px; }
-        .message-content blockquote { border-left: 3px solid var(--accent); padding-left: 12px; margin: 8px 0; color: var(--ink-500); font-style: italic; }
-        .message.user .message-content { background: var(--accent-100); margin-left: auto; text-align: right; }
-        .empty-state svg { width: 54px; height: 54px; margin-bottom: 14px; opacity: .45; }
-        .input-section { padding: 13px; background: var(--surface-muted); border-top: 1px solid var(--border); flex-shrink: 0; }
-        @media (min-width: 769px) { .input-section { border-radius: 0 0 var(--radius-lg) var(--radius-lg); } }
-        .input-wrapper { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        #queryInput { flex: 1; padding: 10px 15px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 13.5px; outline: none; transition: all .2s; min-width: 180px; font-family: inherit; }
-        #queryInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-100); }
-        .send-btn { padding: 10px; width: 40px; height: 40px; border: none; border-radius: 50%; background: var(--accent); color: #fff; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; }
-        .send-btn:hover { background: var(--accent-600); }
-        .send-btn:disabled { background: var(--ink-300); cursor: not-allowed; }
-        .mic-btn, .speaker-btn { padding: 10px; width: 40px; height: 40px; border: none; border-radius: 50%; background: var(--success); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all .2s; }
-        .mic-btn:hover, .speaker-btn:hover { background: #128a3e; transform: scale(1.05); }
-        .mic-btn.recording { background: var(--danger); animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
-        .loading.inline { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--warn-bg); border-radius: var(--radius-sm); margin-bottom: 10px; }
-        .spinner { width: 15px; height: 15px; border: 2px solid rgba(0,0,0,.08); border-top: 2px solid var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .error { background: var(--danger-bg); color: #8f1d34; padding: 10px 12px; border-radius: var(--radius-sm); margin-bottom: 10px; font-size: 12.5px; }
-        #screenshotCanvas { display: none; }
-        @media (max-width: 768px) {
-            .ai-help-button { bottom: 18px; right: 18px; width: 52px; height: 52px; }
-            .ai-help-button svg { width: 24px; height: 24px; }
-            .upload-btn { min-width: auto; flex: 1 1 45%; }
-            #queryInput { min-width: auto; flex: 1 1 100%; }
-        }
-        .queue-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: var(--accent); color: #fff; font-size: 10.5px; font-weight: 700;
-            border-radius: 999px; padding: 1px 7px; margin-left: 6px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="navbar">
-            <button class="nav-btn active" onclick="showSection('home', event)">🏠 Home</button>
-            <button class="nav-btn" onclick="showSection('upload', event)">📤 Upload Data</button>
-            <button class="nav-btn" onclick="showSection('paste', event)">📋 Paste &amp; Create</button>
-            <button class="nav-btn" onclick="showSection('view', event)">📁 View All Files</button>
-            <button class="nav-btn" onclick="showSection('urls', event)">🔗 Saved URLs</button>
-            <button class="nav-btn" onclick="window.location.href='images'">🖼️ Images to PDF</button>
-            <button class="nav-btn" onclick="window.location.href='whiteboard'">✏️ Practice Whiteboard</button>
-        </div>
-        <div class="content">
-            <!-- Home Section -->
-            <div id="home" class="section active">
-                <h1>Welcome to File Manager System</h1>
-                <p style="color: var(--ink-500); font-size: 14px; line-height: 1.6;">
-                    Advanced file management system with screenshot support, text extraction, and an AI assistant.
-                </p>
-                <div style="margin-top: 20px; padding: 18px; background: var(--success-bg); border-radius: var(--radius-md); border: 1px solid #b6f0c8;">
-                    <h3 style="color: var(--success); margin-bottom: 10px; font-size: 15.5px;">📋 Features</h3>
-                    <ul style="color: var(--ink-700); line-height: 1.8; font-size: 13.5px; padding-left: 18px;">
-                        <li>Upload any file type (PDF, images, documents)</li>
-                        <li>View files directly in browser, full screen</li>
-                        <li>Paste screenshots directly from clipboard</li>
-                        <li>Create and save text documents</li>
-                        <li>Admin-only update / delete</li>
-                        <li>Fully responsive design</li>
-                        <li>Extract and list URLs from text documents</li>
-                        <li>Save and manage URLs separately</li>
-                        <li>AI Assistant with multi-screenshot uploads and Q&amp;A</li>
-                        <li>Speech-to-text and text-to-speech</li>
-                    </ul>
-                </div>
-            </div>
-            <!-- Upload Section -->
-            <div id="upload" class="section">
-                <h1>Upload New File</h1>
-                <div id="uploadAlert"></div>
-                <div class="upload-form">
-                    <form id="uploadForm">
-                        <label for="uploadFile" class="btn select-btn" id="selectBtn">📤 Select File</label>
-                        <input type="file" id="uploadFile" required hidden>
-                        <div id="selectedFileName" class="file-name-preview" style="display:none;"></div>
-                        <button type="submit" class="btn">📤 Upload File</button>
-                    </form>
-                </div>
-            </div>
-            <!-- Paste & Create Section -->
-            <div id="paste" class="section" id="paste-section">
-                <h1>Paste Screenshot or Create Content</h1>
-                <div id="pasteAlert"></div>
-                <div class="mode-selector">
-                    <button class="mode-btn active" onclick="setMode('paste')">📸 Paste Screenshot</button>
-                    <button class="mode-btn" onclick="setMode('text')">📝 Create Text</button>
-                </div>
-                <!-- Paste Mode -->
-                <div id="pasteMode" class="paste-area" tabindex="0">
-                    <div class="paste-icon">📸</div>
-                    <h3>Press Ctrl+V to paste screenshot</h3>
-                    <p style="color: var(--ink-500); margin-top: 10px;">
-                        Take a screenshot anywhere and paste it here!<br>
-                        Or drag and drop an image file
-                    </p>
-                    <img id="pastedImage" style="display: none; max-width: 100%; margin-top: 20px; border-radius: 8px;">
-                </div>
-                <!-- Text Mode -->
-                <div id="textMode" style="display: none;" class="create-content-wrapper">
-                    <div class="form-group">
-                        <label for="textTitle">Document Title</label>
-                        <input type="text" id="textTitle" placeholder="My Document">
-                    </div>
-                    <div class="form-group">
-                        <label for="textContent">Content</label>
-                        <textarea id="textContent" placeholder="Write your content here..."></textarea>
-                    </div>
-                </div>
-                <!-- Save Actions (Fixed Bottom) -->
-                <div class="save-actions" id="saveActions">
-                    <input type="text" id="pastedFileName" class="btn" placeholder="Enter filename (e.g., document.txt)" style="margin: 0; flex: 1; background: var(--surface); color: var(--ink-900);">
-                    <button class="btn" onclick="saveContent()">💾 Save</button>
-                    <button class="btn close-btn" onclick="resetPaste()">Cancel</button>
-                </div>
-            </div>
-            <!-- View Section -->
-            <div id="view" class="section">
-                <h1>All Uploaded Files</h1>
-                <div id="viewAlert"></div>
-                <div id="filesContainer" class="loading">Loading files...</div>
-            </div>
-            <!-- Saved URLs Section -->
-            <div id="urls" class="section urls-section">
-                <h1>Saved URLs</h1>
-                <div id="urlsAlert"></div>
-                <div class="url-input-form">
-                    <div class="form-group" style="flex: 1; min-width: 200px;">
-                        <label for="urlInput">Enter URL</label>
-                        <input type="url" id="urlInput" placeholder="https://example.com" required>
-                    </div>
-                    <div class="form-group" style="flex: 1; min-width: 150px;">
-                        <label for="urlTitle">Title (Optional)</label>
-                        <input type="text" id="urlTitle" placeholder="Page Title">
-                    </div>
-                    <button class="btn" onclick="saveUrl()" style="align-self: flex-end; height: 43px;">🔗 Save URL</button>
-                </div>
-                <div id="urlsContainer" class="urls-container loading">Loading saved URLs...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete URL Modal (compact popup) -->
-    <div id="deleteUrlModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Delete URL (Admin Only)</h2>
-                <button type="button" class="btn close-btn" onclick="closeDeleteUrlModal()">✕</button>
-            </div>
-            <form id="deleteUrlForm">
-                <div class="form-group">
-                    <label for="deleteUrlEmail">Admin Email *</label>
-                    <input type="email" id="deleteUrlEmail" required placeholder="abc@gmail.com">
-                </div>
-                <p style="color: var(--danger); margin-bottom: 15px; font-size: 13.5px;">
-                    ⚠️ Deleting URL: <strong id="deleteUrlTitle"></strong>
-                </p>
-                <input type="hidden" id="deleteUrlId">
-                <button type="submit" class="btn btn-delete">🗑️ Delete URL</button>
-                <button type="button" class="btn close-btn" onclick="closeDeleteUrlModal()">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- View File Modal - full screen (file viewer needs the room) -->
-    <div id="viewModal" class="modal modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="viewFileName">File Viewer</h2>
-                <div>
-                    <button class="btn close-btn maximize-btn" onclick="toggleMaximize()">⛶ Maximize</button>
-                    <button class="btn close-btn" onclick="closeViewModal()">✕ Close</button>
-                </div>
-            </div>
-            <div class="viewer-container" id="fileViewer">Loading...</div>
-        </div>
-    </div>
-
-    <!-- Update Modal (compact popup) -->
-    <div id="updateModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Update File (Admin Only)</h2>
-                <button type="button" class="btn close-btn" onclick="closeUpdateModal()">✕</button>
-            </div>
-            <form id="updateForm">
-                <div class="form-group">
-                    <label for="updateEmail">Admin Email *</label>
-                    <input type="email" id="updateEmail" required placeholder="abc@gmail.com">
-                </div>
-                <div class="form-group">
-                    <label for="updateFile">Select New File *</label>
-                    <input type="file" id="updateFile" required>
-                </div>
-                <input type="hidden" id="updateFileId">
-                <button type="submit" class="btn">🔄 Update</button>
-                <button type="button" class="btn close-btn" onclick="closeUpdateModal()">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete Modal (compact popup) -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Delete File (Admin Only)</h2>
-                <button type="button" class="btn close-btn" onclick="closeDeleteModal()">✕</button>
-            </div>
-            <form id="deleteForm">
-                <div class="form-group">
-                    <label for="deleteEmail">Admin Email *</label>
-                    <input type="email" id="deleteEmail" required placeholder="abc@gmail.com">
-                </div>
-                <p style="color: var(--danger); margin-bottom: 15px; font-size: 13.5px;">⚠️ This action cannot be undone!</p>
-                <input type="hidden" id="deleteFileId">
-                <button type="submit" class="btn btn-delete">🗑️ Delete</button>
-                <button type="button" class="btn close-btn" onclick="closeDeleteModal()">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- AI Help Elements -->
-    <button class="ai-help-button" id="aiHelpBtn" title="AI Help">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="16" cy="16" r="16" fill="none"/>
-            <path d="M16 3c1 0 1.8.7 1.98 1.64C21.9 5.4 25 8.9 25 13.1v3.4c0 .6.2 1.18.55 1.66l1.2 1.63c.6.82.02 1.98-1 1.98H6.25c-1.02 0-1.6-1.16-1-1.98l1.2-1.63c.36-.48.55-1.06.55-1.66v-3.4c0-4.2 3.1-7.7 7.02-8.46C14.2 3.7 15 3 16 3Z" fill="#fff"/>
-            <circle cx="12.2" cy="13.4" r="1.6" fill="#4f6ef7"/>
-            <circle cx="19.8" cy="13.4" r="1.6" fill="#4f6ef7"/>
-            <path d="M12.5 17.2c1.9 1.4 5.1 1.4 7 0" stroke="#4f6ef7" stroke-width="1.4" stroke-linecap="round"/>
-            <circle cx="16" cy="1.6" r="1.6" fill="#fff"/>
-        </svg>
-    </button>
-
-    <div class="ai-container" id="aiContainer">
-        <div class="ai-header">
-            <h3>
-                <svg class="bot-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16 3c1 0 1.8.7 1.98 1.64C21.9 5.4 25 8.9 25 13.1v3.4c0 .6.2 1.18.55 1.66l1.2 1.63c.6.82.02 1.98-1 1.98H6.25c-1.02 0-1.6-1.16-1-1.98l1.2-1.63c.36-.48.55-1.06.55-1.66v-3.4c0-4.2 3.1-7.7 7.02-8.46C14.2 3.7 15 3 16 3Z" fill="#fff"/>
-                    <circle cx="12.2" cy="13.4" r="1.6" fill="#4f6ef7"/>
-                    <circle cx="19.8" cy="13.4" r="1.6" fill="#4f6ef7"/>
-                    <path d="M12.5 17.2c1.9 1.4 5.1 1.4 7 0" stroke="#4f6ef7" stroke-width="1.4" stroke-linecap="round"/>
-                </svg>
-                AI Document Helper
-            </h3>
-            <button class="ai-close-btn" id="closeBtn" title="Close assistant">✕</button>
-        </div>
-        <div class="upload-section">
-            <div class="upload-options">
-                <label class="upload-btn" id="uploadFileBtn">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                    </svg>
-                    <span>Upload Files</span>
-                    <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.bmp,.tiff" multiple>
-                </label>
-                <button class="upload-btn" id="screenshotBtn">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-                        <line x1="7" y1="2" x2="7" y2="22"></line>
-                        <line x1="17" y1="2" x2="17" y2="22"></line>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <line x1="2" y1="7" x2="7" y2="7"></line>
-                        <line x1="2" y1="17" x2="7" y2="17"></line>
-                        <line x1="17" y1="17" x2="22" y2="17"></line>
-                        <line x1="17" y1="7" x2="22" y2="7"></line>
-                    </svg>
-                    <span>Screenshot</span>
-                </button>
-                <button class="upload-btn" id="clearBtn">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                    <span>Clear</span>
-                </button>
-            </div>
-            <div class="file-info" id="fileInfo">
-                <span>📄</span>
-                <span id="fileName"></span>
-            </div>
-        </div>
-        <div class="chat-section">
-            <div class="messages-container" id="messagesContainer">
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    <h4>Ready to help!</h4>
-                    <p>Upload one or more documents / screenshots, or take a screenshot</p>
-                </div>
-            </div>
-        </div>
-        <div class="input-section">
-            <div class="input-wrapper">
-                <input type="text" id="queryInput" placeholder="Ask about your document..." disabled>
-                <button class="mic-btn" id="micBtn" title="Speak your query">🎤</button>
-                <button class="send-btn" id="sendBtn" disabled>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
-                <button class="speaker-btn" id="speakerBtn" title="Read response aloud" disabled>🔊</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Screen Capture Modal -->
-    <div class="capture-modal" id="captureModal">
-        <div class="capture-area" id="captureArea"></div>
-        <div class="capture-controls">
-            <button class="upload-btn" id="fullPageBtn" style="padding: 10px 20px;">📄 Full Page</button>
-            <button class="upload-btn" id="captureBtn" style="padding: 10px 20px;">📸 Capture Area</button>
-            <button class="upload-btn" id="cancelCaptureBtn" style="padding: 10px 20px; background: var(--danger); color: white;">❌ Cancel</button>
-        </div>
-    </div>
-    <canvas id="screenshotCanvas"></canvas>
-
-    <!-- PDF.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        // Upload-tab file preview
-        document.getElementById('uploadFile').addEventListener('change', function () {
-            const fileBox = document.getElementById('selectedFileName');
-            const selectBtn = document.getElementById('selectBtn');
-            if (this.files.length > 0) {
-                selectBtn.style.display = 'none';
-                fileBox.style.display = 'block';
-                fileBox.textContent = `📄 ${this.files[0].name}`;
+async def download_file(request):
+    try:
+        file_id = int(request.match_info['file_id'])
+        
+        # Fetch file with data from DB
+        res = await run_supabase_sync(
+            supabase.table('files')
+            .select("filename, size, md5_hash, download_count, file_data")
+            .eq('id', file_id)
+            .eq('status', 'active')
+            .single()
+            .execute
+        )
+        
+        if not res.data:
+            raise web.HTTPNotFound(text="File not found or deleted")
+        
+        file = res.data
+        
+        if not file.get('file_data'):
+            log_operation("DOWNLOAD", file_id, file['filename'], None, False, error_message="File data missing")
+            raise web.HTTPNotFound(text="File data not found in database")
+        
+        # Decode base64 file content
+        try:
+            file_bytes = base64.b64decode(file['file_data'])
+        except Exception as e:
+            logger.error(f"Failed to decode file data for ID {file_id}: {e}")
+            raise web.HTTPInternalServerError(text="File data corrupted")
+        
+        mime, _ = mimetypes.guess_type(file['filename'])
+        mime = mime or 'application/octet-stream'
+        
+        # Update download count
+        current_count = file.get('download_count', 0)
+        await run_supabase_sync(
+            supabase.table('files')
+            .update({"download_count": current_count + 1, "last_accessed": datetime.utcnow().isoformat()})
+            .eq('id', file_id)
+            .execute
+        )
+        
+        log_operation("DOWNLOAD", file_id, file['filename'], success=True,
+                      details=f"Size: {file['size']:,}")
+        
+        return web.Response(
+            body=file_bytes,
+            headers={
+                "Content-Disposition": f'attachment; filename="{file["filename"]}"',
+                "Content-Type": mime,
+                "Content-Length": str(len(file_bytes)),
+                "X-File-Hash": file["md5_hash"] or ""
             }
-        });
+        )
+    except web.HTTPException:
+        raise
+    except ValueError:
+        raise web.HTTPBadRequest(text="Invalid file ID")
+    except Exception as e:
+        logger.error(f"Download error: {e}")
+        raise
 
-        let currentMode = 'paste';
-        let currentFileId = null;
-        let currentFileName = null;
-        let isMaximized = false;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            setupPasteArea();
-        });
+async def delete_file(request):
+    try:
+        file_id = int(request.match_info.get("file_id"))
+    except (TypeError, ValueError):
+        return json_error("Invalid file ID", 400)
 
-        function showSection(sectionId, e) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            e.target.classList.add('active');
-            if (sectionId === 'view') loadFiles();
-            else if (sectionId === 'urls') loadUrls();
+    # ---------------------------
+    # Extract email
+    # ---------------------------
+    email = request.query.get("email", "").strip()
+
+    if not email:
+        try:
+            data = await request.json()
+            email = data.get("email", "").strip()
+        except Exception:
+            pass
+
+    if not email:
+        return json_error("Email is required", 400)
+
+    logger.info(f"🗑️ HARD DELETE | file_id={file_id} | email={email}")
+
+    # ---------------------------
+    # Admin check
+    # ---------------------------
+    if email != ADMIN_EMAIL:
+        log_operation("DELETE", file_id, user_email=email,
+                      success=False, error_message="Unauthorized")
+        return json_error("Access denied (admin only)", 403)
+
+    try:
+        # ---------------------------
+        # Fetch file first (for logging)
+        # ---------------------------
+        fetch_res = await run_supabase_sync(
+            supabase.table("files")
+            .select("id, filename, size")
+            .eq("id", file_id)
+            .single()
+            .execute
+        )
+
+        if not fetch_res.data:
+            return json_error("File not found", 404)
+
+        file = fetch_res.data
+
+        # ---------------------------
+        # HARD DELETE FROM DB
+        # ---------------------------
+        delete_res = await run_supabase_sync(
+            supabase.table("files")
+            .delete()
+            .eq("id", file_id)
+            .execute
+        )
+
+        # Verify deletion
+        verify_res = await run_supabase_sync(
+            supabase.table("files")
+            .select("id")
+            .eq("id", file_id)
+            .execute
+        )
+
+        if verify_res.data:
+            return json_error("Delete failed: row still exists", 500)
+
+        # ---------------------------
+        # Log success
+        # ---------------------------
+        log_operation(
+            "DELETE",
+            file_id,
+            file["filename"],
+            email,
+            True,
+            f"Size: {file['size']:,}"
+        )
+
+        return web.json_response({
+            "success": True,
+            "message": f"File '{file['filename']}' permanently deleted"
+        })
+
+    except Exception as e:
+        logger.error("🔥 Hard delete failed", exc_info=True)
+        log_operation("DELETE", file_id, user_email=email,
+                      success=False, error_message=str(e))
+        return json_error("Internal server error", 500)
+
+async def update_file(request):
+    try:
+        file_id = int(request.match_info.get("file_id"))
+    except (TypeError, ValueError):
+        return json_error("Invalid file ID", 400)
+
+    try:
+        reader = await request.multipart()
+        new_content = bytearray()
+        new_filename = None
+        email = None
+
+        while True:
+            part = await reader.next()
+            if part is None:
+                break
+
+            if part.name == "file":
+                new_filename = safe_filename(part.filename)
+                async for chunk in part:
+                    new_content.extend(chunk)
+
+            elif part.name == "email":
+                email = (await part.text()).strip()
+
+        # ---------------------------
+        # Validation
+        # ---------------------------
+        if not email:
+            return json_error("Email is required", 400)
+
+        if email != ADMIN_EMAIL:
+            log_operation("UPDATE", file_id, user_email=email,
+                          success=False, error_message="Unauthorized")
+            return json_error("Access denied (admin only)", 403)
+
+        if not new_filename or not new_content:
+            return json_error("File is required for update", 400)
+
+        new_size = len(new_content)
+
+        if new_size > MAX_FILE_SIZE:
+            return json_error(
+                f"File too large. Max {MAX_FILE_SIZE // 1024 // 1024}MB",
+                413
+            )
+
+        # ---------------------------
+        # Fetch existing file (verify exists)
+        # ---------------------------
+        old_res = await run_supabase_sync(
+            supabase.table("files")
+            .select("id, filename")
+            .eq("id", file_id)
+            .single()
+            .execute
+        )
+
+        if not old_res.data:
+            return json_error("File not found", 404)
+
+        # ---------------------------
+        # Prepare update data
+        # ---------------------------
+        new_hash = calculate_file_hash(bytes(new_content))
+        file_b64 = base64.b64encode(bytes(new_content)).decode("utf-8")
+
+        update_payload = {
+            "filename": new_filename,
+            "filetype": Path(new_filename).suffix.lstrip(".").upper() or "FILE",
+            "size": new_size,
+            "md5_hash": new_hash,
+            "last_accessed": datetime.utcnow().isoformat(),
+            "file_data": file_b64
         }
 
-        function setMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('pasteMode').style.display = mode === 'paste' ? 'flex' : 'none';
-            document.getElementById('textMode').style.display = mode === 'text' ? 'block' : 'none';
-            const saveActions = document.getElementById('saveActions');
-            if (mode === 'paste' || mode === 'text') {
-                saveActions.classList.add('active');
-                if (mode === 'text') {
-                    const title = document.getElementById('textTitle').value || 'document';
-                    document.getElementById('pastedFileName').value = title.endsWith('.txt') ? title : title + '.txt';
-                    document.getElementById('pastedImage').style.display = 'none';
-                } else {
-                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                    document.getElementById('pastedFileName').value = `screenshot-${timestamp}.png`;
-                    document.getElementById('pastedImage').style.display = 'block';
-                }
-            } else {
-                saveActions.classList.remove('active');
+        # ---------------------------
+        # UPDATE (no assumptions)
+        # ---------------------------
+        await run_supabase_sync(
+            supabase.table("files")
+            .update(update_payload)
+            .eq("id", file_id)
+            .execute
+        )
+
+        # ---------------------------
+        # VERIFY UPDATE (CRITICAL)
+        # ---------------------------
+        verify_res = await run_supabase_sync(
+            supabase.table("files")
+            .select("filename, size, md5_hash")
+            .eq("id", file_id)
+            .single()
+            .execute
+        )
+
+        if not verify_res.data:
+            return json_error(
+                "Update failed: row not found after update",
+                500
+            )
+
+        if verify_res.data["md5_hash"] != new_hash:
+            return json_error(
+                "Update blocked by database policy (RLS)",
+                403
+            )
+
+        # ---------------------------
+        # Log success
+        # ---------------------------
+        log_operation(
+            "UPDATE",
+            file_id,
+            new_filename,
+            email,
+            True,
+            f"Size: {new_size:,} Hash: {new_hash}"
+        )
+
+        return web.json_response({
+            "success": True,
+            "message": f"File '{new_filename}' updated successfully",
+            "filename": new_filename,
+            "size": new_size,
+            "hash": new_hash
+        })
+
+    except web.HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error("🔥 Update failed", exc_info=True)
+        log_operation(
+            "UPDATE",
+            file_id,
+            success=False,
+            error_message=str(e)
+        )
+        return json_error("Internal server error", 500)
+
+
+
+
+
+async def save_url(request):
+    try:
+        reader = await request.multipart()
+        url = None
+        title = None
+        email = "anonymous@user.com"
+        while True:
+            part = await reader.next()
+            if part is None:
+                break
+            if part.name == "url":
+                url = (await part.text()).strip()
+            elif part.name == "title":
+                title = (await part.text()).strip()
+            elif part.name == "email":
+                email = (await part.text()).strip()[:180] or email
+        
+        if not url:
+            raise web.HTTPBadRequest(text="url is required")
+        
+        if not title:
+            title = url
+        
+        # Generate unique short code
+        import random
+        import string
+        max_attempts = 10
+        short_code = None
+        
+        for attempt in range(max_attempts):
+            timestamp = str(int(datetime.utcnow().timestamp() * 1000))
+            random_part = ''.join(random.choices(string.ascii_letters + string.digits, k=3))
+            short_code = hashlib.md5(f"{timestamp}{random_part}".encode()).hexdigest()[:5]
+            
+            # Check if short_code already exists
+            existing = await run_supabase_sync(
+                supabase.table('urls')
+                .select("id")
+                .eq('short_code', short_code)
+                .execute
+            )
+            
+            if not existing.data:
+                break
+            short_code = None
+        
+        if not short_code:
+            raise RuntimeError("Could not generate unique short code after multiple attempts")
+        
+        # Insert URL
+        result = await run_supabase_sync(
+            supabase.table('urls')
+            .insert({
+                "url": url,
+                "title": title,
+                "short_code": short_code,
+                "email": email,
+                "created_at": datetime.utcnow().isoformat()
+            })
+            .execute
+        )
+        
+        return web.json_response({
+            "success": True,
+            "id": result.data[0]["id"],
+            "short_code": short_code,
+            "message": "URL saved"
+        })
+    except Exception as e:
+        logger.error(f"Save URL error: {e}")
+        raise
+
+async def get_urls(request):
+    try:
+        res = await run_supabase_sync(
+            supabase.table('urls')
+            .select("id, url, title, short_code, email, created_at")
+            .order('created_at', desc=True)
+            .execute
+        )
+        return web.json_response({
+            "success": True,
+            "urls": res.data or [],
+            "total": len(res.data or [])
+        })
+    except Exception as e:
+        logger.error(f"Get URLs error: {e}")
+        raise
+
+async def url_redirect(request):
+    """Redirect to the saved URL - this is the endpoint that should redirect"""
+    try:
+        url_id = int(request.match_info['url_id'])
+    except (ValueError, KeyError):
+        return web.Response(text="Invalid URL ID", status=400)
+    
+    try:
+        res = await run_supabase_sync(
+            supabase.table('urls')
+            .select("url")
+            .eq('id', url_id)
+            .single()
+            .execute
+        )
+        
+        if not res.data or not res.data.get('url'):
+            return web.Response(text="URL not found", status=404)
+        
+        target_url = res.data["url"]
+        
+        # Make sure URL has a scheme (http:// or https://)
+        if not target_url.startswith(('http://', 'https://')):
+            target_url = 'https://' + target_url
+        
+        logger.info(f"Redirecting URL ID {url_id} to {target_url}")
+        
+        # Return a proper redirect response
+        return web.Response(
+            status=302,
+            headers={'Location': target_url}
+        )
+        
+    except Exception as e:
+        logger.error(f"URL redirect error: {e}", exc_info=True)
+        return web.Response(text=f"Redirect failed: {str(e)}", status=500)
+
+async def delete_url(request):
+    try:
+        url_id = int(request.match_info['url_id'])
+    except (ValueError, KeyError):
+        return json_error("Invalid URL ID", 400)
+    
+    # FIXED: Try to get email from multiple sources
+    email = None
+    
+    # 1. Try query params first
+    email = request.query.get('email', '').strip()
+    
+    # 2. If not in query, try JSON body
+    if not email:
+        try:
+            data = await request.json()
+            email = data.get('email', '').strip()
+        except:
+            pass
+    
+    # 3. If not in JSON, try form data
+    if not email:
+        try:
+            post_data = await request.post()
+            email = post_data.get('email', '').strip()
+        except:
+            pass
+    
+    logger.info(f"Delete URL request for ID {url_id} with email: {email}")
+    
+    if not email:
+        return json_error("Email is required for deletion", 400)
+    
+    if email != ADMIN_EMAIL:
+        logger.warning(f"Unauthorized URL delete attempt by {email} for URL ID {url_id}")
+        return json_error(f"Access denied. Only admin ({ADMIN_EMAIL}) can delete URLs.", 403)
+    
+    try:
+        res = await run_supabase_sync(
+            supabase.table('urls')
+            .select("id, url, title")
+            .eq('id', url_id)
+            .single()
+            .execute
+        )
+        
+        if not res.data:
+            return json_error("URL not found", 404)
+        
+        url_data = res.data
+        
+        await run_supabase_sync(
+            supabase.table('urls')
+            .delete()
+            .eq('id', url_id)
+            .execute
+        )
+        
+        logger.info(f"URL deleted: ID={url_id}, Title='{url_data['title']}', By={email}")
+        
+        return web.json_response({
+            "success": True,
+            "message": f"URL '{url_data['title']}' deleted successfully"
+        })
+    
+    except web.HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Delete URL failed: {e}", exc_info=True)
+        return json_error(f"Failed to delete URL: {str(e)}", 500)
+
+
+# ────────────────────────────────────────────────
+# AUTH (email + password, Supabase-backed)
+# ────────────────────────────────────────────────
+def hash_password(password: str, salt: str = None) -> tuple[str, str]:
+    """PBKDF2-SHA256 password hash. Returns (hash_hex, salt_hex)."""
+    if salt is None:
+        salt = uuid.uuid4().hex
+    dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 120_000)
+    return dk.hex(), salt
+
+def verify_password(password: str, stored_hash: str, salt: str) -> bool:
+    check, _ = hash_password(password, salt)
+    return check == stored_hash
+
+async def auth_signup(request):
+    try:
+        data = await request.json()
+        email = (data.get('email') or '').strip().lower()[:180]
+        password = data.get('password') or ''
+        name = (data.get('name') or email.split('@')[0]).strip()[:120]
+
+        if not email or '@' not in email:
+            return json_error("Valid email is required", 400)
+        if len(password) < 6:
+            return json_error("Password must be at least 6 characters", 400)
+
+        existing = await run_supabase_sync(
+            supabase.table('users').select("id").eq('email', email).execute
+        )
+        if existing.data:
+            return json_error("An account with this email already exists", 409)
+
+        pw_hash, salt = hash_password(password)
+        result = await run_supabase_sync(
+            supabase.table('users').insert({
+                "email": email,
+                "name": name,
+                "password_hash": pw_hash,
+                "password_salt": salt,
+                "created_at": datetime.utcnow().isoformat(),
+                "is_admin": email == ADMIN_EMAIL
+            }).execute
+        )
+        log_operation("SIGNUP", user_email=email, success=True)
+        return web.json_response({
+            "success": True,
+            "message": "Account created",
+            "user": {"email": email, "name": name, "is_admin": email == ADMIN_EMAIL}
+        })
+    except web.HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Signup failed: {e}", exc_info=True)
+        return json_error("Signup failed", 500)
+
+async def auth_login(request):
+    try:
+        data = await request.json()
+        email = (data.get('email') or '').strip().lower()[:180]
+        password = data.get('password') or ''
+
+        if not email or not password:
+            return json_error("Email and password are required", 400)
+
+        res = await run_supabase_sync(
+            supabase.table('users').select("*").eq('email', email).single().execute
+        )
+        if not res.data:
+            log_operation("LOGIN", user_email=email, success=False, error_message="No such user")
+            return json_error("Invalid email or password", 401)
+
+        user = res.data
+        if not verify_password(password, user['password_hash'], user['password_salt']):
+            log_operation("LOGIN", user_email=email, success=False, error_message="Bad password")
+            return json_error("Invalid email or password", 401)
+
+        token = uuid.uuid4().hex
+        AUTH_TOKENS[token] = email
+        log_operation("LOGIN", user_email=email, success=True)
+        return web.json_response({
+            "success": True,
+            "token": token,
+            "user": {"email": email, "name": user.get('name'), "is_admin": email == ADMIN_EMAIL}
+        })
+    except web.HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login failed: {e}", exc_info=True)
+        return json_error("Invalid email or password", 401)
+
+# in-memory token store (simple session; swap for JWT/redis in production)
+AUTH_TOKENS = {}
+
+async def auth_me(request):
+    token = request.headers.get('X-Auth-Token') or request.query.get('token')
+    email = AUTH_TOKENS.get(token)
+    if not email:
+        return json_error("Not authenticated", 401)
+    return web.json_response({"success": True, "email": email, "is_admin": email == ADMIN_EMAIL})
+
+
+class SessionManager:
+    def __init__(self):
+        self.sessions = {}
+    
+    def create_session(self, user_email=None):
+        session_id = str(uuid.uuid4())
+        self.sessions[session_id] = {
+            'history': [],
+            'pages': [],          # ordered list of {data, name, type} - "book mode"
+            'current_page': 0,
+            'file_data': None,
+            'file_name': None,
+            'file_type': None,
+            'user_email': user_email or 'anonymous@user.com'
+        }
+        return session_id
+    
+    def get_session(self, session_id):
+        return self.sessions.get(session_id)
+    
+    def add_to_history(self, session_id, role, content):
+        if session_id in self.sessions:
+            history = self.sessions[session_id]['history']
+            history.append({
+                'role': role,
+                'content': content
+            })
+
+            # Keep only last 10 messages
+            if len(history) > 10:
+                self.sessions[session_id]['history'] = history[-10:]
+
+            # Persist to Supabase so it shows in the user's chat history
+            try:
+                text_content = content if isinstance(content, str) else str(content)
+                supabase.table('chat_history').insert({
+                    "session_id": session_id,
+                    "user_email": self.sessions[session_id].get('user_email', 'anonymous@user.com'),
+                    "role": role,
+                    "content": text_content[:8000],
+                    "file_name": self.sessions[session_id].get('file_name'),
+                    "created_at": datetime.utcnow().isoformat()
+                }).execute()
+            except Exception as e:
+                logger.error(f"chat_history persist failed: {e}")
+
+    def set_file_data(self, session_id, file_data, filename, file_type):
+        if session_id in self.sessions:
+            self.sessions[session_id]['file_data'] = file_data
+            self.sessions[session_id]['file_name'] = filename
+            self.sessions[session_id]['file_type'] = file_type
+
+    def add_page(self, session_id, file_data, filename, file_type):
+        """Book mode: append a page (screenshot) to the ordered reading queue."""
+        if session_id not in self.sessions:
+            return None
+        session = self.sessions[session_id]
+        page = {'data': file_data, 'name': filename, 'type': file_type}
+        session['pages'].append(page)
+        # keep legacy single-file fields pointed at the newest page for backward compat
+        self.set_file_data(session_id, file_data, filename, file_type)
+        return len(session['pages']) - 1  # index of the page just added
+
+    def set_current_page(self, session_id, index):
+        if session_id not in self.sessions:
+            return False
+        session = self.sessions[session_id]
+        if 0 <= index < len(session['pages']):
+            session['current_page'] = index
+            page = session['pages'][index]
+            self.set_file_data(session_id, page['data'], page['name'], page['type'])
+            return True
+        return False
+
+session_manager = SessionManager()
+
+def get_mime_type(filename):
+    """Get MIME type from filename"""
+    ext = filename.lower().split('.')[-1]
+    mime_types = {
+        'pdf': 'application/pdf',
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'bmp': 'image/bmp',
+        'tiff': 'image/tiff',
+        'gif': 'image/gif',
+        'webp': 'image/webp'
+    }
+    return mime_types.get(ext, 'application/octet-stream')
+
+def check_pdf_pages(file_data):
+    """Check if PDF has more than 2 pages"""
+    try:
+        pdf_reader = PyPDF2.PdfReader(BytesIO(file_data))
+        return len(pdf_reader.pages)
+    except:
+        return 0
+
+
+
+
+def create_system_prompt():
+    """Corporate/MNC-style helpdesk tone, same strict grounding rules as before."""
+    return """You are a professional AI Knowledge Assistant, deployed as part of an enterprise document-intelligence platform. Respond the way a well-trained corporate support specialist would: courteous, precise, structured, and confident — never casual slang, never over-familiar.
+
+CRITICAL RULES - FOLLOW EXACTLY:
+
+1. ONLY use the provided uploaded document/image content.
+   - DO NOT use external knowledge.
+   - DO NOT guess.
+   - DO NOT hallucinate.
+
+2. NEVER generate:
+   - Duplicate questions
+   - Duplicate options
+   - Incorrect question numbers
+   - Mismatched options for a question
+   - Repeated explanations
+
+3. If generating multiple questions (e.g., "generate 20 questions"):
+   - Number them sequentially (1, 2, 3 ... 20).
+   - Ensure each question is UNIQUE.
+   - Ensure each question is derived directly from the document.
+   - Ensure options belong ONLY to that specific question.
+   - Validate internally before responding that no question or option is repeated.
+
+4. If asked about a specific question number (e.g., "question 5", "Q7"):
+   - Locate EXACT matching question from the document.
+   - Confirm the question text matches the document.
+   - Identify correct option accurately.
+   - Provide explanation in 3 levels:
+        a) Beginner level (basic concept)
+        b) Intermediate reasoning
+        c) Advanced detailed explanation
+   - Clearly state WHY the correct option is correct.
+   - Clearly state WHY other options are incorrect (if applicable).
+
+5. For questions NOT present in the document:
+   - Respond EXACTLY:
+     "I apologize, but I can only answer questions based on the uploaded document. The information about [topic] is not present in the provided content. Please ask questions related to the document."
+
+6. For greetings (hi, hello, how are you):
+   - Respond briefly, warmly, and professionally, the way a corporate helpdesk agent would greet a client.
+   - Remind the user you only answer based on the uploaded document.
+
+7. Tone and formatting standards (MNC helpdesk style):
+   - Open with a brief acknowledgement when helpful (e.g., "Certainly," "Understood,").
+   - Use clear headings/bullets for multi-part answers.
+   - Close longer answers with a short, professional offer of further help (e.g., "Let me know if you'd like this explained further.").
+   - Avoid emojis, avoid slang, avoid overly casual phrasing.
+
+8. If the user is reading a multi-page document page-by-page ("book mode"), answer strictly using the CURRENT page shown to you, unless the user explicitly references another page number they've already seen.
+
+9. BEFORE responding:
+   - Internally verify:
+        ✓ No duplicate questions
+        ✓ No duplicate options
+        ✓ Proper numbering sequence
+        ✓ No external knowledge used
+        ✓ All content exists in document
+        ✓ Tone matches a professional enterprise assistant
+
+REMEMBER:
+You have ZERO knowledge outside the uploaded document.
+If something is unclear or missing in the document, say so professionally.
+Do NOT fabricate. Do NOT assume. Do NOT repeat content unnecessarily.
+"""
+
+
+async def create_session_handler(request):
+    """Create a new session, optionally tied to a logged-in user's email."""
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    user_email = (data.get('email') or '').strip().lower() or None
+    session_id = session_manager.create_session(user_email=user_email)
+    return web.json_response({'session_id': session_id})
+
+async def upload_file_handler(request):
+    """Handle file upload — supports book mode (page = true) so multiple
+    screenshots of the same document get queued as ordered pages instead
+    of overwriting one another."""
+    try:
+        reader = await request.multipart()
+        session_id = None
+        file_data = None
+        filename = None
+        book_mode = False
+
+        async for part in reader:
+            if part.name == 'session_id':
+                session_id = await part.text()
+            elif part.name == 'book_mode':
+                book_mode = (await part.text()).strip().lower() in ('1', 'true', 'yes')
+            elif part.name == 'file':
+                filename = part.filename
+                file_data = await part.read()
+        
+        if not session_id or not file_data:
+            return web.json_response(
+                {'error': 'Missing session_id or file'},
+                status=400
+            )
+        
+        session = session_manager.get_session(session_id)
+        if not session:
+            return web.json_response(
+                {'error': 'Invalid session_id'},
+                status=404
+            )
+        
+        # Check file type
+        mime_type = get_mime_type(filename)
+        
+        # Check if PDF has more than 2 pages
+        if mime_type == 'application/pdf':
+            num_pages = check_pdf_pages(file_data)
+            if num_pages > 2:
+                return web.json_response(
+                    {'error': f'PDF has {num_pages} pages. Maximum allowed is 2 pages. Please upload a smaller file.'},
+                    status=400
+                )
+        
+        if not (mime_type.startswith('image/') or mime_type == 'application/pdf'):
+            return web.json_response(
+                {'error': 'Unsupported file type. Use PDF or image files.'},
+                status=400
+            )
+        
+        # Convert to base64
+        base64_data = base64.b64encode(file_data).decode('utf-8')
+        
+        if book_mode:
+            page_index = session_manager.add_page(session_id, base64_data, filename, mime_type)
+            return web.json_response({
+                'status': 'success',
+                'message': f'Page {page_index + 1} ("{filename}") added to reading queue',
+                'file_type': mime_type,
+                'page_index': page_index,
+                'total_pages': len(session['pages'])
+            })
+
+        # Store file data (single-document mode, legacy behaviour)
+        session_manager.set_file_data(session_id, base64_data, filename, mime_type)
+        
+        return web.json_response({
+            'status': 'success',
+            'message': f'File "{filename}" uploaded successfully',
+            'file_type': mime_type
+        })
+    
+    except Exception as e:
+        return web.json_response(
+            {'error': f'Upload failed: {str(e)}'},
+            status=500
+        )
+
+async def set_page_handler(request):
+    """Book mode: jump to a specific page (0-indexed) like turning a page."""
+    try:
+        data = await request.json()
+        session_id = data.get('session_id')
+        index = int(data.get('index', 0))
+        session = session_manager.get_session(session_id)
+        if not session:
+            return web.json_response({'error': 'Invalid session_id'}, status=404)
+        ok = session_manager.set_current_page(session_id, index)
+        if not ok:
+            return web.json_response({'error': 'Page index out of range'}, status=400)
+        return web.json_response({
+            'status': 'success',
+            'current_page': index,
+            'total_pages': len(session['pages']),
+            'file_name': session['file_name']
+        })
+    except Exception as e:
+        return web.json_response({'error': f'Failed to switch page: {str(e)}'}, status=500)
+
+async def query_handler(request):
+    """Handle user queries"""
+    try:
+        data = await request.json()
+        session_id = data.get('session_id')
+        query = data.get('query')
+        
+        if not session_id or not query:
+            return web.json_response(
+                {'error': 'Missing session_id or query'},
+                status=400
+            )
+        
+        session = session_manager.get_session(session_id)
+        if not session:
+            return web.json_response(
+                {'error': 'Invalid session_id'},
+                status=404
+            )
+        
+        if not session['file_data']:
+            return web.json_response(
+                {'error': 'No file uploaded in this session. Please upload a file first.'},
+                status=400
+            )
+        
+        # Add user query to history
+        session_manager.add_to_history(session_id, 'user', query)
+        
+        # Build messages for Groq API - using simpler format
+        messages = [
+            {
+                'role': 'system',
+                'content': create_system_prompt()
             }
-        }
+        ]
+        
+        # For Groq, we'll send images directly and PDFs as base64 with a note
+        if len(session['history']) == 1:  # First message
+            if session['file_type'].startswith('image/'):
+                # Send image directly
+                messages.append({
+                    'role': 'user',
+                    'content': [
+                        {
+                            'type': 'image_url',
+                            'image_url': {
+                                'url': f"data:{session['file_type']};base64,{session['file_data']}"
+                            }
+                        },
+                        {
+                            'type': 'text',
+                            'text': query
+                        }
+                    ]
+                })
+            else:
+                # For PDFs, we need to handle it as text since Groq doesn't support PDF directly
+                # We'll extract text from the PDF
+                try:
+                    pdf_data = base64.b64decode(session['file_data'])
+                    pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
+                    pdf_text = ""
+                    for page_num in range(len(pdf_reader.pages)):
+                        page = pdf_reader.pages[page_num]
+                        pdf_text += f"Page {page_num + 1}:\n{page.extract_text()}\n\n"
+                    
+                    messages.append({
+                        'role': 'user',
+                        'content': f"Document content from {session['file_name']}:\n\n{pdf_text}\n\nUser question: {query}"
+                    })
+                except:
+                    return web.json_response(
+                        {'error': 'Failed to process PDF. Please try uploading an image instead.'},
+                        status=500
+                    )
+        else:
+            # Handle conversation history
+            if session['file_type'].startswith('image/'):
+                # First message with image
+                messages.append({
+                    'role': 'user',
+                    'content': [
+                        {
+                            'type': 'image_url',
+                            'image_url': {
+                                'url': f"data:{session['file_type']};base64,{session['file_data']}"
+                            }
+                        },
+                        {
+                            'type': 'text',
+                            'text': session['history'][0]['content']
+                        }
+                    ]
+                })
+            else:
+                # For PDFs in history
+                try:
+                    pdf_data = base64.b64decode(session['file_data'])
+                    pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_data))
+                    pdf_text = ""
+                    for page_num in range(len(pdf_reader.pages)):
+                        page = pdf_reader.pages[page_num]
+                        pdf_text += f"Page {page_num + 1}:\n{page.extract_text()}\n\n"
+                    
+                    messages.append({
+                        'role': 'user',
+                        'content': f"Document content from {session['file_name']}:\n\n{pdf_text}\n\nUser question: {session['history'][0]['content']}"
+                    })
+                except:
+                    pass
+            
+            recent_history = session['history'][-10:]
 
-        function setupPasteArea() {
-            const pasteArea = document.getElementById('pasteMode');
-            if (!pasteArea) return;
-            pasteArea.addEventListener('paste', handlePaste);
-            document.addEventListener('paste', (e) => {
-                if (currentMode === 'paste' && document.getElementById('paste').classList.contains('active')) {
-                    handlePaste(e);
-                }
-            });
-            pasteArea.addEventListener('dragover', (e) => { e.preventDefault(); pasteArea.classList.add('dragover'); });
-            pasteArea.addEventListener('dragleave', () => pasteArea.classList.remove('dragover'));
-            pasteArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                pasteArea.classList.remove('dragover');
-                const file = e.dataTransfer.files[0];
-                if (file && file.type.startsWith('image/')) displayPastedImage(file);
-            });
-        }
+            for msg in recent_history:
+                messages.append({
+                    'role': msg['role'],
+                    'content': msg['content']
+                })
+        
+        # Call Groq API
+        completion = groq_client.chat.completions.create(
+            model="qwen/qwen3.8-27b",  # Use vision model for images
+            messages=messages,
+            temperature=0.7,
+            max_tokens=2048,
+            top_p=0.9
+        )
+        
+        response_text = completion.choices[0].message.content
+        
+        # Add assistant response to history
+        session_manager.add_to_history(session_id, 'assistant', response_text)
+        
+        return web.json_response({
+            'response': response_text,
+            'file_name': session['file_name'],
+            'current_page': session.get('current_page', 0),
+            'total_pages': len(session.get('pages', []))
+        })
+    
+    except Exception as e:
+        return web.json_response(
+            {'error': f'Query failed: {str(e)}. The AI model may not support this file format. Try uploading an image instead of PDF.'},
+            status=500
+        )
 
-        function handlePaste(e) {
-            const items = e.clipboardData.items;
-            for (let item of items) {
-                if (item.type.indexOf('image') !== -1) {
-                    const blob = item.getAsFile();
-                    displayPastedImage(blob);
-                    break;
-                }
-            }
-        }
+async def get_history_handler(request):
+    """Get conversation history for a live session"""
+    session_id = request.match_info.get('session_id')
+    
+    session = session_manager.get_session(session_id)
+    if not session:
+        return web.json_response(
+            {'error': 'Invalid session_id'},
+            status=404
+        )
+    
+    return web.json_response({
+        'history': session['history'],
+        'file_name': session['file_name']
+    })
 
-        function displayPastedImage(blob) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('pastedImage').src = e.target.result;
-                document.getElementById('pastedImage').style.display = 'block';
-                document.getElementById('pasteMode').style.display = 'none';
-            };
-            reader.readAsDataURL(blob);
-            window.currentBlob = blob;
-        }
+async def get_user_chat_history(request):
+    """Get a logged-in user's persisted chat history (across sessions/devices)."""
+    email = request.match_info.get('email', '').strip().lower()
+    if not email:
+        return json_error("Email is required", 400)
+    try:
+        res = await run_supabase_sync(
+            supabase.table('chat_history')
+            .select("id, session_id, role, content, file_name, created_at")
+            .eq('user_email', email)
+            .order('created_at', desc=True)
+            .limit(200)
+            .execute
+        )
+        return web.json_response({"success": True, "history": res.data or []})
+    except Exception as e:
+        logger.error(f"get_user_chat_history error: {e}", exc_info=True)
+        return json_error("Failed to load chat history", 500)
 
-        async function saveContent() {
-            let file;
-            let filename = document.getElementById('pastedFileName').value || 'file';
-            if (currentMode === 'paste') {
-                if (!window.currentBlob) { showAlert('pasteAlert', '❌ No image to save', 'error'); return; }
-                file = new File([window.currentBlob], filename, { type: 'image/png' });
-            } else if (currentMode === 'text') {
-                const title = document.getElementById('textTitle').value || 'document';
-                const content = document.getElementById('textContent').value;
-                if (!content.trim()) { showAlert('pasteAlert', '❌ Please enter some content', 'error'); return; }
-                const blob = new Blob([content], { type: 'text/plain' });
-                file = new File([blob], title.endsWith('.txt') ? title : title + '.txt', { type: 'text/plain' });
-            }
-            const formData = new FormData();
-            formData.append('file', file);
-            try {
-                const response = await fetch('/api/upload', { method: 'POST', body: formData });
-                const data = await response.json();
-                if (response.ok) {
-                    showAlert('pasteAlert', '✅ ' + data.message, 'success');
-                    resetPaste();
-                    loadFiles();
-                } else {
-                    showAlert('pasteAlert', '❌ ' + data.message, 'error');
-                }
-            } catch (error) {
-                showAlert('pasteAlert', '❌ Error saving file', 'error');
-            }
-        }
+async def clear_history_handler(request):
+    """Clear conversation history but keep file"""
+    data = await request.json()
+    session_id = data.get('session_id')
+    
+    session = session_manager.get_session(session_id)
+    if not session:
+        return web.json_response(
+            {'error': 'Invalid session_id'},
+            status=404
+        )
+    
+    session['history'] = []
+    return web.json_response({'status': 'History cleared'})
 
-        function resetPaste() {
-            document.getElementById('saveActions').classList.remove('active');
-            document.getElementById('pasteMode').style.display = 'flex';
-            document.getElementById('textMode').style.display = 'none';
-            document.getElementById('pastedImage').src = '';
-            document.getElementById('pastedImage').style.display = 'none';
-            document.getElementById('pastedFileName').value = '';
-            document.getElementById('textTitle').value = '';
-            document.getElementById('textContent').value = '';
-            window.currentBlob = null;
-        }
+# CORS middleware
+@web.middleware
+async def cors_middleware(request, handler):
+    if request.method == 'OPTIONS':
+        response = web.Response()
+    else:
+        response = await handler(request)
+    
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-Auth-Token'
+    return response
 
-        function showAlert(containerId, message, type) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => { container.innerHTML = ''; }, 5000);
-        }
+async def index_handler(request):
+    """Serve the HTML file"""
+    try:
+        with open('ai.html', 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        return web.Response(text=html_content, content_type='text/html')
+    except FileNotFoundError:
+        return web.Response(text="ai.html file not found!", status=404)
 
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fileInput = document.getElementById('uploadFile');
-            const file = fileInput.files[0];
-            if (!file) { showAlert('uploadAlert', '❌ Please select a file', 'error'); return; }
-            const formData = new FormData();
-            formData.append('file', file);
-            try {
-                const response = await fetch('/api/upload', { method: 'POST', body: formData });
-                const data = await response.json();
-                if (response.ok) {
-                    showAlert('uploadAlert', '✅ ' + data.message, 'success');
-                    document.getElementById('uploadForm').reset();
-                    document.getElementById('selectedFileName').style.display = 'none';
-                    document.getElementById('selectBtn').style.display = 'inline-flex';
-                    loadFiles();
-                } else {
-                    showAlert('uploadAlert', '❌ ' + data.message, 'error');
-                }
-            } catch (error) {
-                showAlert('uploadAlert', '❌ Error uploading file: ' + error.message, 'error');
-            }
-        });
 
-        async function loadFiles() {
-            const container = document.getElementById('filesContainer');
-            container.innerHTML = '<div class="loading">Loading files...</div>';
-            try {
-                const response = await fetch('/api/files');
-                const data = await response.json();
-                if (response.ok && data.files && data.files.length > 0) {
-                    container.innerHTML = '<div class="files-grid">' + data.files.map(file => createFileCard(file)).join('') + '</div>';
-                } else {
-                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📁</div><h3>No files uploaded yet</h3><p>Upload your first file to get started!</p></div>`;
-                }
-            } catch (error) {
-                container.innerHTML = '<div class="alert alert-error">❌ Error loading files</div>';
-            }
-        }
+# ────────────────────────────────────────────────
+# APP SETUP
+# ────────────────────────────────────────────────
 
-        function createFileCard(file) {
-            const icon = getFileIcon(file.filename);
-            const date = new Date(file.uploaded_at).toLocaleString();
-            return `
-                <div class="file-card">
-                    <div class="file-icon">${icon}</div>
-                    <div class="file-name">${file.filename}</div>
-                    <div class="file-info">📅 ${date}</div>
-                    <div class="file-info">💾 ${formatFileSize(file.size)}</div>
-                    <div class="file-actions">
-                        <button class="btn btn-small btn-view" onclick="viewFile('${file.id}', '${file.filename}')">👁️ View</button>
-                        <button class="btn btn-small btn-update" onclick="openUpdateModal('${file.id}')">🔄 Update</button>
-                        <button class="btn btn-small btn-delete" onclick="openDeleteModal('${file.id}')">🗑️ Delete</button>
-                    </div>
-                </div>
-            `;
-        }
+def create_app():
+    app = web.Application(client_max_size=MAX_FILE_SIZE + 2*1024*1024)
+    app.middlewares.append(cors_middleware)
+    app.middlewares.append(json_error_middleware)
 
-        function getFileIcon(filename) {
-            const ext = filename.split('.').pop().toLowerCase();
-            const icons = {
-                'pdf': '📄', 'doc': '📝', 'docx': '📝', 'xls': '📊', 'xlsx': '📊',
-                'ppt': '📽️', 'pptx': '📽️', 'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️', 'bmp': '🖼️',
-                'mp4': '🎬', 'avi': '🎬', 'mov': '🎬', 'mp3': '🎵', 'wav': '🎵', 'zip': '📦', 'rar': '📦',
-                'txt': '📃', 'html': '🌐', 'css': '🎨', 'js': '⚙️', 'url': '🔗'
-            };
-            return icons[ext] || '📄';
-        }
+    # auth
+    app.router.add_post('/api/auth/signup', auth_signup)
+    app.router.add_post('/api/auth/login', auth_login)
+    app.router.add_get('/api/auth/me', auth_me)
 
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-        }
+    # chatbot
+    app.router.add_get('/ai-boat', index_handler)
+    app.router.add_post('/api/session/create', create_session_handler)
+    app.router.add_post('/api/uploads', upload_file_handler)
+    app.router.add_post('/api/session/page', set_page_handler)
+    app.router.add_post('/api/query', query_handler)
+    app.router.add_get('/api/history/{session_id}', get_history_handler)
+    app.router.add_get('/api/chat-history/{email}', get_user_chat_history)
+    app.router.add_post('/api/history/clear', clear_history_handler)
 
-        function extractUrls(text) {
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            let match, urls = [];
-            while ((match = urlRegex.exec(text)) !== null) urls.push(match[1]);
-            return [...new Set(urls)];
-        }
+    # dashboard / pages
+    app.router.add_get('/', read_root)
+    app.router.add_get('/images', last_read_root)
+    app.router.add_get('/whiteboard', at_last_read_root)
 
-        async function viewFile(fileId, filename) {
-            currentFileId = fileId;
-            currentFileName = filename;
-            isMaximized = false;
-            document.getElementById('viewModal').classList.remove('maximized');
-            document.getElementById('viewModal').classList.add('active');
-            document.getElementById('viewFileName').textContent = filename;
-            const viewer = document.getElementById('fileViewer');
-            viewer.innerHTML = '<div class="loading">Loading file...</div>';
-            document.getElementById('aiHelpBtn').classList.add('visible');
-            document.getElementById('aiHelpBtn').classList.remove('hidden');
-            try {
-                const ext = filename.split('.').pop().toLowerCase();
-                const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-                const url = `/api/files/${fileId}/download`;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch file');
-                const blob = await response.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                if (imageExts.includes(ext)) {
-                    const img = document.createElement('img');
-                    img.src = blobUrl;
-                    img.alt = filename;
-                    img.onclick = function() {
-                        this.style.transform = this.style.transform === 'scale(2)' ? 'scale(1)' : 'scale(2)';
-                        this.style.cursor = this.style.transform === 'scale(2)' ? 'zoom-out' : 'zoom-in';
-                    };
-                    viewer.innerHTML = '';
-                    viewer.appendChild(img);
-                } else if (ext === 'pdf') {
-                    await renderPDF(blobUrl, viewer);
-                } else if (ext === 'txt' || ext === 'log' || ext === 'md') {
-                    const text = await blob.text();
-                    const escaped = escapeHtml(text);
-                    const urls = extractUrls(text);
-                    let urlList = '';
-                    if (urls.length > 0) {
-                        urlList = `<div class="extracted-urls"><h4>Extracted URLs (Numbered):</h4><ol>${urls.map(url => `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></li>`).join('')}</ol></div>`;
-                    }
-                    viewer.innerHTML = `<pre>${escaped}</pre>${urlList}`;
-                } else if (ext === 'html' || ext === 'htm') {
-                    const iframe = document.createElement('iframe');
-                    iframe.src = blobUrl;
-                    viewer.innerHTML = '';
-                    viewer.appendChild(iframe);
-                } else if (ext === 'url') {
-                    const urlContent = await blob.text();
-                    const actualUrl = urlContent.trim();
-                    viewer.innerHTML = `<div style="text-align: center; padding: 30px;"><h3>${filename}</h3><p style="font-size: 16px; margin-bottom: 15px;">URL: <a href="${actualUrl}" target="_blank" rel="noopener noreferrer">${actualUrl}</a></p><button class="btn" onclick="window.open('${actualUrl}', '_blank')">🌐 Go to Page</button></div>`;
-                } else {
-                    viewer.innerHTML = `<div style="text-align: center; padding: 30px;"><div style="font-size: 48px; margin-bottom: 15px;">📄</div><p style="font-size: 16px; margin-bottom: 15px;">${filename}</p><p style="color: var(--ink-500);">Preview not available for this file type.</p></div>`;
-                }
-                window.blobUrls = window.blobUrls || [];
-                window.blobUrls.push(blobUrl);
-            } catch (error) {
-                viewer.innerHTML = '<div class="alert alert-error" style="text-align: center;">❌ Error loading file</div>';
-            }
-        }
+    # file manager
+    app.router.add_get('/api/files', get_files)
+    app.router.add_post('/api/upload', upload_file)
+    app.router.add_put('/api/files/{file_id}/update', update_file)
+    app.router.add_delete('/api/files/{file_id}/delete', delete_file)
+    app.router.add_get('/api/files/{file_id}/download', download_file)
 
-        async function renderPDF(blobUrl, viewer) {
-            try {
-                const loadingTask = pdfjsLib.getDocument(blobUrl);
-                const pdf = await loadingTask.promise;
-                viewer.innerHTML = '';
-                const container = document.createElement('div');
-                container.className = 'pdf-container';
-                viewer.appendChild(container);
-                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                    const page = await pdf.getPage(pageNum);
-                    const scale = window.innerWidth < 768 ? 1.0 : 1.3;
-                    const viewport = page.getViewport({ scale });
-                    const pageDiv = document.createElement('div');
-                    pageDiv.className = 'pdf-page';
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    const label = document.createElement('div');
-                    label.style.textAlign = 'center';
-                    label.style.fontSize = '10px';
-                    label.style.color = '#666';
-                    label.style.marginBottom = '3px';
-                    label.textContent = `Page ${pageNum}`;
-                    pageDiv.appendChild(label);
-                    pageDiv.appendChild(canvas);
-                    container.appendChild(pageDiv);
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                }
-            } catch (error) {
-                viewer.innerHTML = '<div class="alert alert-error" style="text-align: center;">❌ Error rendering PDF</div>';
-                console.error('Error rendering PDF:', error);
-            }
-        }
+    # urls
+    app.router.add_post('/api/save-url', save_url)
+    app.router.add_get('/api/urls', get_urls)
+    app.router.add_delete('/api/urls/{url_id}/delete', delete_url)
+    app.router.add_get('/api/url/{url_id}', url_redirect)
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+    logger.info("All routes registered:")
+    for r in app.router.routes():
+        logger.info(f" {r.method:6} {r.resource.canonical}")
+    return app
 
-        function toggleMaximize() {
-            isMaximized = !isMaximized;
-            const modal = document.getElementById('viewModal');
-            if (isMaximized) {
-                modal.classList.add('maximized');
-                document.querySelector('.maximize-btn').textContent = '⛶ Restore';
-            } else {
-                modal.classList.remove('maximized');
-                document.querySelector('.maximize-btn').textContent = '⛶ Maximize';
-            }
-        }
+async def main():
+    logger.info("=" * 80)
+    logger.info(" FILE MANAGER SERVER - SUPABASE STORAGE ".center(80, "="))
+    logger.info(f" Max file size : {MAX_FILE_SIZE//1024//1024} MB")
+    logger.info(f" Storage : Supabase PostgreSQL (base64 encoded)")
+    logger.info("=" * 80)
+    app = create_app()
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 9000)
+    await site.start()
+    logger.info("Server running → http://0.0.0.0:9000")
+    logger.info("Press Ctrl+C to stop")
+    await asyncio.Future()
 
-        function closeViewModal() {
-            document.getElementById('viewModal').classList.remove('active', 'maximized');
-            if (window.blobUrls) {
-                window.blobUrls.forEach(url => URL.revokeObjectURL(url));
-                window.blobUrls = [];
-            }
-            document.getElementById('aiHelpBtn').classList.remove('visible');
-            document.getElementById('aiHelpBtn').classList.add('hidden');
-            currentFileId = null;
-            currentFileName = null;
-            isMaximized = false;
-            document.querySelector('.maximize-btn').textContent = '⛶ Maximize';
-        }
-
-        function openUpdateModal(fileId) {
-            document.getElementById('updateFileId').value = fileId;
-            document.getElementById('updateModal').classList.add('active');
-        }
-        function closeUpdateModal() {
-            document.getElementById('updateModal').classList.remove('active');
-            document.getElementById('updateForm').reset();
-        }
-        document.getElementById('updateForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fileId = document.getElementById('updateFileId').value;
-            const email = document.getElementById('updateEmail').value;
-            const file = document.getElementById('updateFile').files[0];
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('email', email);
-            try {
-                const response = await fetch(`/api/files/${fileId}/update`, { method: 'PUT', body: formData });
-                const data = await response.json();
-                if (response.ok) {
-                    showAlert('viewAlert', '✅ ' + data.message, 'success');
-                    closeUpdateModal();
-                    loadFiles();
-                } else {
-                    showAlert('viewAlert', '❌ ' + data.message, 'error');
-                    closeUpdateModal();
-                }
-            } catch (error) {
-                showAlert('viewAlert', '❌ Error updating file', 'error');
-                closeUpdateModal();
-            }
-        });
-
-        function openDeleteModal(fileId) {
-            document.getElementById('deleteFileId').value = fileId;
-            document.getElementById('deleteModal').classList.add('active');
-        }
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.remove('active');
-            document.getElementById('deleteForm').reset();
-        }
-        document.getElementById('deleteForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fileId = document.getElementById('deleteFileId').value;
-            const email = document.getElementById('deleteEmail').value;
-            try {
-                const response = await fetch(`/api/files/${fileId}/delete?email=${encodeURIComponent(email)}`, { method: 'DELETE' });
-                const data = await response.json();
-                if (response.ok) {
-                    showAlert('viewAlert', '✅ ' + data.message, 'success');
-                    closeDeleteModal();
-                    loadFiles();
-                } else {
-                    showAlert('viewAlert', '❌ ' + data.message, 'error');
-                    closeDeleteModal();
-                }
-            } catch (error) {
-                showAlert('viewAlert', '❌ Error deleting file', 'error');
-                closeDeleteModal();
-            }
-        });
-
-        async function saveUrl() {
-            const url = document.getElementById('urlInput').value.trim();
-            const title = document.getElementById('urlTitle').value.trim() || url;
-            if (!url) { showAlert('urlsAlert', '❌ Please enter a URL', 'error'); return; }
-            const formData = new FormData();
-            formData.append('url', url);
-            formData.append('title', title);
-            try {
-                const response = await fetch('/api/save-url', { method: 'POST', body: formData });
-                const data = await response.json();
-                if (response.ok) {
-                    showAlert('urlsAlert', '✅ URL saved: ' + data.message, 'success');
-                    document.getElementById('urlInput').value = '';
-                    document.getElementById('urlTitle').value = '';
-                    loadUrls();
-                } else {
-                    showAlert('urlsAlert', '❌ ' + data.message, 'error');
-                }
-            } catch (error) {
-                showAlert('urlsAlert', '❌ Error saving URL: ' + error.message, 'error');
-            }
-        }
-
-        async function loadUrls() {
-            const container = document.getElementById('urlsContainer');
-            container.innerHTML = '<div class="loading">Loading URLs...</div>';
-            try {
-                const response = await fetch('/api/urls');
-                const data = await response.json();
-                if (response.ok && data.urls && data.urls.length > 0) {
-                    container.innerHTML = '<div class="urls-grid">' + data.urls.map((urlObj, index) => createUrlCard(urlObj, index + 1)).join('') + '</div>';
-                } else {
-                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔗</div><h3>No URLs saved yet</h3><p>Save your first URL to get started!</p></div>`;
-                }
-            } catch (error) {
-                container.innerHTML = '<div class="alert alert-error">❌ Error loading URLs</div>';
-            }
-        }
-
-        function escapeQuotes(str) { return str.replace(/'/g, "\\'").replace(/"/g, "&quot;"); }
-
-        function openDeleteUrlModal(urlId, urlTitle) {
-            document.getElementById('deleteUrlId').value = urlId;
-            document.getElementById('deleteUrlTitle').textContent = urlTitle;
-            document.getElementById('deleteUrlModal').classList.add('active');
-        }
-        function closeDeleteUrlModal() {
-            document.getElementById('deleteUrlModal').classList.remove('active');
-            document.getElementById('deleteUrlForm').reset();
-        }
-        document.getElementById('deleteUrlForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const urlId = document.getElementById('deleteUrlId').value;
-            const email = document.getElementById('deleteUrlEmail').value;
-            try {
-                const response = await fetch(`/api/urls/${urlId}/delete?email=${encodeURIComponent(email)}`, { method: 'DELETE' });
-                const data = await response.json();
-                if (response.ok) {
-                    showAlert('urlsAlert', '✅ ' + data.message, 'success');
-                    closeDeleteUrlModal();
-                    loadUrls();
-                } else {
-                    showAlert('urlsAlert', '❌ ' + data.message, 'error');
-                    closeDeleteUrlModal();
-                }
-            } catch (error) {
-                showAlert('urlsAlert', '❌ Error deleting URL', 'error');
-                closeDeleteUrlModal();
-            }
-        });
-
-        function createUrlCard(urlObj, number) {
-            return `
-                <div class="url-card">
-                    <div class="url-number">${number}</div>
-                    <div class="file-name">${urlObj.title}</div>
-                    <div class="url-link">${urlObj.url}</div>
-                    <div class="file-actions">
-                        <button class="btn btn-small btn-view" onclick="viewUrl('${urlObj.id}')">🌐 Go to Page</button>
-                        <button class="btn btn-small btn-delete" onclick="openDeleteUrlModal('${urlObj.id}', '${escapeQuotes(urlObj.title)}')">🗑️ Delete</button>
-                    </div>
-                </div>
-            `;
-        }
-        function viewUrl(id) { window.open(`/api/url/${id}`, '_blank'); }
-
-        // Close popup modals on background click (compact ones only — file viewer stays open on backdrop click while browsing)
-        document.querySelectorAll('.modal:not(.modal-fullscreen)').forEach(modal => {
-            modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
-        });
-        document.getElementById('viewModal').addEventListener('click', (e) => {
-            if (e.target.id === 'viewModal') closeViewModal();
-        });
-
-        /* =========================================================
-           AI Help Script — supports uploading MULTIPLE screenshots
-           / files at once, queued and processed one after another.
-        ========================================================= */
-        const API_URL = window.location.origin;
-        let sessionId = null;
-        let isCapturing = false;
-        let startX, startY, endX, endY;
-        let lastBotResponse = '';
-        let uploadQueue = [];
-        let queuedNames = [];
-
-        const recognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window ?
-            (window.SpeechRecognition || window.webkitSpeechRecognition) ? new (window.SpeechRecognition || window.webkitSpeechRecognition)() : null : null;
-        const synthesis = window.speechSynthesis;
-        if (recognition) {
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-        }
-
-        async function initSession() {
-            try {
-                const response = await fetch(`${API_URL}/api/session/create`, { method: 'POST' });
-                const data = await response.json();
-                sessionId = data.session_id;
-            } catch (error) {
-                showError('Failed to initialize session');
-            }
-        }
-
-        document.getElementById('aiHelpBtn').addEventListener('click', () => {
-            const container = document.getElementById('aiContainer');
-            const button = document.getElementById('aiHelpBtn');
-            container.classList.add('show');
-            button.classList.add('hidden');
-            if (!sessionId) initSession();
-            if (window.innerWidth < 769) setTimeout(() => { autoFullPageCapture(); }, 5000);
-        });
-        document.getElementById('closeBtn').addEventListener('click', () => {
-            document.getElementById('aiContainer').classList.remove('show');
-            document.getElementById('aiHelpBtn').classList.remove('hidden');
-        });
-
-        // Multi-file upload — every selected file is queued and uploaded in sequence
-        document.getElementById('fileInput').addEventListener('change', async (e) => {
-            const files = Array.from(e.target.files || []);
-            if (!files.length) return;
-            for (const f of files) {
-                if (f.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        addMessage('user', `<img src="${ev.target.result}" style="max-width: 100%; border-radius: 8px;" alt="Uploaded file">`);
-                    };
-                    reader.readAsDataURL(f);
-                } else {
-                    addMessage('user', `📄 ${f.name}`);
-                }
-            }
-            await uploadFilesSequentially(files);
-            e.target.value = '';
-        });
-
-        document.getElementById('screenshotBtn').addEventListener('click', async () => {
-            if (typeof html2canvas === 'undefined') {
-                showError('html2canvas library failed to load. Please refresh the page.');
-                return;
-            }
-            document.getElementById('aiContainer').classList.remove('show');
-            const modal = document.getElementById('captureModal');
-            modal.classList.add('show');
-            const captureArea = document.getElementById('captureArea');
-            captureArea.style.display = 'block';
-            captureArea.style.left = '0px';
-            captureArea.style.top = '0px';
-            captureArea.style.width = '0px';
-            captureArea.style.height = '0px';
-            isCapturing = false;
-            modal.removeEventListener('mousedown', startCapture);
-            modal.removeEventListener('mousemove', updateCapture);
-            modal.removeEventListener('mouseup', endCapture);
-            modal.addEventListener('mousedown', startCapture);
-            modal.addEventListener('mousemove', updateCapture);
-            modal.addEventListener('mouseup', endCapture);
-        });
-
-        document.getElementById('fullPageBtn').addEventListener('click', async () => { await autoFullPageCapture(); });
-
-        async function autoFullPageCapture() {
-            const modal = document.getElementById('captureModal');
-            modal.style.display = 'none';
-            document.body.style.cursor = 'wait';
-            try {
-                const isMobile = window.innerWidth < 769;
-                const options = isMobile
-                    ? { x: window.scrollX, y: window.scrollY, width: window.innerWidth, height: window.innerHeight, scale: window.devicePixelRatio || 1, useCORS: true, backgroundColor: null }
-                    : { scale: window.devicePixelRatio || 1, useCORS: true, backgroundColor: null };
-                const canvas = await html2canvas(document.body, options);
-                canvas.toBlob(async (blob) => {
-                    if (!blob) return;
-                    const file = new File([blob], `screenshot-${Date.now()}.png`, { type: 'image/png' });
-                    const reader = new FileReader();
-                    reader.onload = (e) => addMessage('user', `<img src="${e.target.result}" style="max-width:100%;border-radius:8px;">`);
-                    reader.readAsDataURL(file);
-                    await uploadFilesSequentially([file]);
-                    document.getElementById('aiContainer').classList.add('show');
-                });
-            } catch (err) {
-                showError('Screenshot failed: ' + err.message);
-            } finally {
-                document.body.style.cursor = 'default';
-            }
-        }
-
-        async function performCapture() {
-            const modal = document.getElementById('captureModal');
-            const captureArea = document.getElementById('captureArea');
-            const rect = captureArea.getBoundingClientRect();
-            const { left, top, width, height } = rect;
-            if (width < 5 || height < 5) { showError('Please select a larger area to capture.'); return; }
-            modal.style.display = 'none';
-            document.body.style.cursor = 'wait';
-            try {
-                const fullCanvas = await html2canvas(document.documentElement, {
-                    scale: window.devicePixelRatio > 1 ? 2 : 1, useCORS: true, allowTaint: true,
-                    backgroundColor: null, logging: false,
-                    width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight
-                });
-                const croppedCanvas = document.createElement('canvas');
-                const ctx = croppedCanvas.getContext('2d');
-                croppedCanvas.width = width;
-                croppedCanvas.height = height;
-                const sourceX = window.pageXOffset + left;
-                const sourceY = window.pageYOffset + top;
-                ctx.drawImage(fullCanvas, sourceX, sourceY, width, height, 0, 0, width, height);
-                return new Promise((resolve, reject) => {
-                    croppedCanvas.toBlob(async (blob) => {
-                        if (blob) {
-                            const file = new File([blob], `screenshot-${Date.now()}.png`, { type: 'image/png' });
-                            const reader = new FileReader();
-                            reader.onload = (e) => addMessage('user', `<img src="${e.target.result}" style="max-width: 100%; border-radius: 8px;" alt="Area Screenshot">`);
-                            reader.readAsDataURL(file);
-                            try {
-                                await uploadFilesSequentially([file]);
-                                document.getElementById('aiContainer').classList.add('show');
-                                resolve();
-                            } catch (err) { reject(err); }
-                        } else { reject(new Error('Failed to create image blob')); }
-                    }, 'image/png', 0.95);
-                });
-            } catch (error) {
-                showError('Screenshot capture failed: ' + (error.message || 'Unknown error.'));
-            } finally {
-                document.body.style.cursor = 'default';
-                captureArea.style.display = 'none';
-                modal.classList.remove('show');
-            }
-        }
-
-        function startCapture(e) {
-            if (e.target.closest('.capture-controls')) return;
-            isCapturing = true;
-            startX = e.clientX; startY = e.clientY;
-            const captureArea = document.getElementById('captureArea');
-            captureArea.style.left = startX + 'px';
-            captureArea.style.top = startY + 'px';
-            captureArea.style.width = '0px';
-            captureArea.style.height = '0px';
-        }
-        function updateCapture(e) {
-            if (!isCapturing) return;
-            endX = e.clientX; endY = e.clientY;
-            const captureArea = document.getElementById('captureArea');
-            const left = Math.min(startX, endX);
-            const top = Math.min(startY, endY);
-            const width = Math.abs(endX - startX);
-            const height = Math.abs(endY - startY);
-            if (width > 0 && height > 0) {
-                captureArea.style.left = left + 'px';
-                captureArea.style.top = top + 'px';
-                captureArea.style.width = width + 'px';
-                captureArea.style.height = height + 'px';
-            }
-        }
-        async function endCapture(e) {
-            if (!isCapturing) return;
-            isCapturing = false;
-            const captureArea = document.getElementById('captureArea');
-            const width = parseInt(captureArea.style.width) || 0;
-            const height = parseInt(captureArea.style.height) || 0;
-            if (width >= 5 && height >= 5) {
-                await performCapture();
-            } else {
-                captureArea.style.width = '0px';
-                captureArea.style.height = '0px';
-            }
-        }
-        document.getElementById('captureBtn').addEventListener('click', async () => { await performCapture(); });
-        document.getElementById('cancelCaptureBtn').addEventListener('click', () => {
-            const modal = document.getElementById('captureModal');
-            const captureArea = document.getElementById('captureArea');
-            modal.classList.remove('show');
-            captureArea.style.display = 'none';
-            document.getElementById('aiContainer').classList.add('show');
-        });
-
-        // Uploads a batch of files one-by-one, keeping the UI in sync with how many are queued
-        async function uploadFilesSequentially(files) {
-            if (!sessionId) await initSession();
-            let uploadedCount = 0;
-            showLoading(files.length > 1 ? `Uploading 1 of ${files.length}...` : 'Uploading file...');
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const formData = new FormData();
-                formData.append('session_id', sessionId);
-                formData.append('file', file);
-                updateLoadingText(files.length > 1 ? `Uploading ${i + 1} of ${files.length}...` : 'Uploading file...');
-                try {
-                    const response = await fetch(`${API_URL}/api/uploads`, { method: 'POST', body: formData });
-                    const data = await response.json();
-                    if (response.ok) {
-                        uploadedCount++;
-                        queuedNames.push(file.name || 'Screenshot');
-                    } else {
-                        throw new Error(data.error || 'Upload failed');
-                    }
-                } catch (error) {
-                    hideLoading();
-                    showError(`${file.name || 'File'} failed to upload: ${error.message || 'Upload failed'}`);
-                }
-            }
-            hideLoading();
-            if (uploadedCount > 0) {
-                currentFileName = queuedNames[queuedNames.length - 1];
-                const label = queuedNames.length > 1
-                    ? `${queuedNames.length} files`
-                    : queuedNames[0];
-                document.getElementById('fileName').textContent = label;
-                document.getElementById('fileInfo').classList.add('show');
-                document.getElementById('queryInput').disabled = false;
-                document.getElementById('sendBtn').disabled = false;
-                clearEmptyState();
-                addMessage('bot', uploadedCount > 1
-                    ? `✅ ${uploadedCount} files uploaded successfully! Ask me anything about them.`
-                    : `✅ File "${currentFileName}" uploaded successfully! Ask me anything about it.`);
-            }
-        }
-
-        async function sendQuery() {
-            const queryInput = document.getElementById('queryInput');
-            const query = queryInput.value.trim();
-            if (!query || !sessionId) return;
-            addMessage('user', query);
-            queryInput.value = '';
-            queryInput.disabled = true;
-            document.getElementById('sendBtn').disabled = true;
-            showLoading('Thinking...');
-            try {
-                const response = await fetch(`${API_URL}/api/query`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ session_id: sessionId, query: query })
-                });
-                const data = await response.json();
-                hideLoading();
-                if (response.ok) {
-                    lastBotResponse = data.response;
-                    addMessage('bot', formatMarkdown(data.response));
-                    document.getElementById('speakerBtn').disabled = false;
-                    if (synthesis && window.innerWidth < 769) {
-                        setTimeout(() => { synthesis.speak(new SpeechSynthesisUtterance(lastBotResponse)); }, 500);
-                    }
-                } else {
-                    throw new Error(data.error || 'Query failed');
-                }
-            } catch (error) {
-                hideLoading();
-                showError(error.message || 'Query failed');
-            } finally {
-                queryInput.disabled = false;
-                document.getElementById('sendBtn').disabled = false;
-                queryInput.focus();
-            }
-        }
-        document.getElementById('sendBtn').addEventListener('click', sendQuery);
-        document.getElementById('queryInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendQuery(); });
-
-        if (recognition) {
-            document.getElementById('micBtn').addEventListener('click', () => {
-                const micBtn = document.getElementById('micBtn');
-                if (micBtn.classList.contains('recording')) recognition.stop();
-                else { recognition.start(); micBtn.classList.add('recording'); }
-            });
-            recognition.onresult = (event) => {
-                const transcript = Array.from(event.results).map(result => result[0].transcript).join('');
-                document.getElementById('queryInput').value = transcript;
-                sendQuery();
-            };
-            recognition.onend = () => document.getElementById('micBtn').classList.remove('recording');
-            recognition.onerror = (event) => {
-                showError('Speech recognition error: ' + event.error);
-                document.getElementById('micBtn').classList.remove('recording');
-            };
-        } else {
-            document.getElementById('micBtn').disabled = true;
-            document.getElementById('micBtn').title = 'Speech recognition not supported';
-        }
-
-        document.getElementById('speakerBtn').addEventListener('click', () => {
-            if (synthesis && lastBotResponse) {
-                const utterance = new SpeechSynthesisUtterance(lastBotResponse);
-                utterance.rate = 0.9; utterance.pitch = 1; utterance.volume = 1;
-                synthesis.speak(utterance);
-            }
-        });
-
-        document.getElementById('clearBtn').addEventListener('click', async () => {
-            if (!sessionId) return;
-            try {
-                await fetch(`${API_URL}/api/history/clear`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ session_id: sessionId })
-                });
-                document.getElementById('messagesContainer').innerHTML = `
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        <h4>Chat cleared!</h4>
-                        <p>Upload a new document to continue</p>
-                    </div>
-                `;
-                document.getElementById('queryInput').disabled = true;
-                document.getElementById('sendBtn').disabled = true;
-                document.getElementById('speakerBtn').disabled = true;
-                document.getElementById('fileInfo').classList.remove('show');
-                currentFileName = null;
-                queuedNames = [];
-                lastBotResponse = '';
-            } catch (error) {
-                showError('Failed to clear history');
-            }
-        });
-
-        function formatMarkdown(text) {
-            text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-            text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-            text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-            text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-            text = text.replace(/`(.*?)`/g, '<code>$1</code>');
-            text = text.replace(/^(\s*[-*+] )(.*$)/gim, '<li>$2</li>');
-            text = text.replace(/<li>([\s\S]*?)<\/li>/g, '<ul>$&</ul>');
-            text = text.replace(/\n\n/g, '</p><p>');
-            text = text.replace(/\n/g, '<br>');
-            text = text.replace(/<p><br>/g, '<p>');
-            if (!text.startsWith('<')) text = `<p>${text}</p>`;
-            return text;
-        }
-
-        function addMessage(role, content) {
-            clearEmptyState();
-            const container = document.getElementById('messagesContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
-            messageDiv.innerHTML = `
-                <div class="message-avatar ${role}-avatar">${role === 'user' ? 'U' : 'AI'}</div>
-                <div class="message-content">${content}</div>
-            `;
-            container.appendChild(messageDiv);
-            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-        }
-        function showLoading(text) {
-            clearEmptyState();
-            const container = document.getElementById('messagesContainer');
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'loading inline';
-            loadingDiv.id = 'loadingIndicator';
-            loadingDiv.innerHTML = `<div class="spinner"></div><span id="loadingText">${text}</span>`;
-            container.appendChild(loadingDiv);
-            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-        }
-        function updateLoadingText(text) {
-            const el = document.getElementById('loadingText');
-            if (el) el.textContent = text;
-        }
-        function hideLoading() {
-            const loading = document.getElementById('loadingIndicator');
-            if (loading) loading.remove();
-        }
-        function showError(message) {
-            clearEmptyState();
-            const container = document.getElementById('messagesContainer');
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.innerHTML = `⚠️ ${message}`;
-            container.appendChild(errorDiv);
-            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-            setTimeout(() => errorDiv.remove(), 5000);
-        }
-        function clearEmptyState() {
-            const emptyState = document.querySelector('.empty-state');
-            if (emptyState) emptyState.remove();
-        }
-
-        document.getElementById('aiContainer').addEventListener('touchmove', (e) => {
-            if (window.innerWidth < 769) e.stopPropagation();
-        }, { passive: false });
-    </script>
-</body>
-</html>
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Server stopped by user")
+    except Exception as e:
+        logger.critical(f"Fatal error: {e}", exc_info=True)
+        sys.exit(1)
