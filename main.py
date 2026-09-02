@@ -105,6 +105,17 @@ async def run_supabase_sync(func, *args, **kwargs):
 def json_error(message, status=500):
     return web.json_response({"success": False, "message": message}, status=status)
 
+# Authorization helper: a user may act on a record if they are the
+# platform admin OR the original owner (matching email) of that record.
+def is_authorized(requester_email: str, owner_email: str | None) -> bool:
+    if not requester_email:
+        return False
+    if requester_email == ADMIN_EMAIL:
+        return True
+    if owner_email and requester_email.strip().lower() == owner_email.strip().lower():
+        return True
+    return False
+
 # ────────────────────────────────────────────────
 # MIDDLEWARE FOR JSON ERRORS
 # ────────────────────────────────────────────────
@@ -343,15 +354,12 @@ async def delete_file(request):
 
     logger.info(f"🗑️ HARD DELETE | file_id={file_id} | email={email}")
 
-    if email != ADMIN_EMAIL:
-        log_operation("DELETE", file_id, user_email=email,
-                      success=False, error_message="Unauthorized")
-        return json_error("Access denied (admin only)", 403)
-
     try:
+        # Fetch the file first so we know who actually owns it before
+        # deciding whether the requester is allowed to delete it.
         fetch_res = await run_supabase_sync(
             supabase.table("files")
-            .select("id, filename, size")
+            .select("id, filename, size, email")
             .eq("id", file_id)
             .single()
             .execute
@@ -361,6 +369,14 @@ async def delete_file(request):
             return json_error("File not found", 404)
 
         file = fetch_res.data
+
+        # Allow either the platform admin OR the original uploader
+        # (the file's owner) to delete it — matching the frontend's
+        # "isOwner" button visibility logic.
+        if not is_authorized(email, file.get("email")):
+            log_operation("DELETE", file_id, file.get("filename"), email,
+                          success=False, error_message="Unauthorized")
+            return json_error("Access denied. Only the file owner or admin can delete this file.", 403)
 
         delete_res = await run_supabase_sync(
             supabase.table("files")
@@ -427,11 +443,6 @@ async def update_file(request):
         if not email:
             return json_error("Email is required", 400)
 
-        if email != ADMIN_EMAIL:
-            log_operation("UPDATE", file_id, user_email=email,
-                          success=False, error_message="Unauthorized")
-            return json_error("Access denied (admin only)", 403)
-
         if not new_filename or not new_content:
             return json_error("File is required for update", 400)
 
@@ -445,7 +456,7 @@ async def update_file(request):
 
         old_res = await run_supabase_sync(
             supabase.table("files")
-            .select("id, filename")
+            .select("id, filename, email")
             .eq("id", file_id)
             .single()
             .execute
@@ -453,6 +464,14 @@ async def update_file(request):
 
         if not old_res.data:
             return json_error("File not found", 404)
+
+        # Allow either the platform admin OR the original uploader
+        # (the file's owner) to update it — matching the frontend's
+        # "isOwner" button visibility logic.
+        if not is_authorized(email, old_res.data.get("email")):
+            log_operation("UPDATE", file_id, old_res.data.get("filename"), email,
+                          success=False, error_message="Unauthorized")
+            return json_error("Access denied. Only the file owner or admin can update this file.", 403)
 
         new_hash = calculate_file_hash(bytes(new_content))
         file_b64 = base64.b64encode(bytes(new_content)).decode("utf-8")
@@ -671,14 +690,10 @@ async def delete_url(request):
     if not email:
         return json_error("Email is required for deletion", 400)
 
-    if email != ADMIN_EMAIL:
-        logger.warning(f"Unauthorized URL delete attempt by {email} for URL ID {url_id}")
-        return json_error(f"Access denied. Only admin ({ADMIN_EMAIL}) can delete URLs.", 403)
-
     try:
         res = await run_supabase_sync(
             supabase.table('urls')
-            .select("id, url, title")
+            .select("id, url, title, email")
             .eq('id', url_id)
             .single()
             .execute
@@ -688,6 +703,13 @@ async def delete_url(request):
             return json_error("URL not found", 404)
 
         url_data = res.data
+
+        # Allow either the platform admin OR the person who originally
+        # saved the link (the link's owner) to delete it — matching the
+        # frontend's "isOwner" button visibility logic.
+        if not is_authorized(email, url_data.get("email")):
+            logger.warning(f"Unauthorized URL delete attempt by {email} for URL ID {url_id}")
+            return json_error("Access denied. Only the link owner or admin can delete this link.", 403)
 
         await run_supabase_sync(
             supabase.table('urls')
