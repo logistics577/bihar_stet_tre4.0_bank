@@ -506,7 +506,7 @@ button{font-family:inherit}
 </div>
 
 <!-- ============ AI ASSISTANT ============ -->
-<button class="ai-fab" id="aiFab" title="AI Assistant">
+<button class="ai-fab hidden" id="aiFab" title="AI Assistant">
   <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M16 3c1 0 1.8.7 1.98 1.64C21.9 5.4 25 8.9 25 13.1v3.4c0 .6.2 1.18.55 1.66l1.2 1.63c.6.82.02 1.98-1 1.98H6.25c-1.02 0-1.6-1.16-1-1.98l1.2-1.63c.36-.48.55-1.06.55-1.66v-3.4c0-4.2 3.1-7.7 7.02-8.46C14.2 3.7 15 3 16 3Z" fill="#fff"/>
     <circle cx="12.2" cy="13.4" r="1.6" fill="#4f6ef7"/><circle cx="19.8" cy="13.4" r="1.6" fill="#4f6ef7"/>
@@ -548,7 +548,7 @@ button{font-family:inherit}
       <div class="ai-empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <h4 style="font-size:13.5px;margin-bottom:4px">Ready to help</h4>
-        <p style="font-size:12px">Upload a document or screenshot, or turn on Book mode to read a multi-page document in order.</p>
+        <p style="font-size:12px">Open a file to ask questions about it.</p>
       </div>
     </div>
   </div>
@@ -771,7 +771,7 @@ async function loadFiles(){
 function createFileCard(file){
   const icon = getFileIcon(file.filename);
   const date = new Date(file.uploaded_at).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
-  const isAdmin = currentUser && currentUser.is_admin;
+  const isOwner = currentUser && (currentUser.is_admin || currentUser.email === file.email);
   return `
     <div class="file-card">
       <div class="file-icon">${icon}</div>
@@ -781,7 +781,7 @@ function createFileCard(file){
       <div class="file-meta">💾 ${formatFileSize(file.size)}</div>
       <div class="file-actions">
         <button class="btn btn-tiny btn-view" onclick="viewFile('${file.id}','${escapeAttr(file.filename)}')">View</button>
-        ${isAdmin ? `<button class="btn btn-tiny btn-update" onclick="openUpdateModal('${file.id}')">Update</button>
+        ${isOwner ? `<button class="btn btn-tiny btn-update" onclick="openUpdateModal('${file.id}')">Update</button>
         <button class="btn btn-tiny btn-danger" onclick="openDeleteModal('${file.id}')">Delete</button>` : ''}
       </div>
     </div>`;
@@ -803,7 +803,7 @@ async function loadUrls(){
 }
 
 function createUrlCard(u){
-  const isAdmin = currentUser && currentUser.is_admin;
+  const isOwner = currentUser && (currentUser.is_admin || currentUser.email === u.email);
   return `
     <div class="url-card">
       <div class="file-name">${escapeHtml(u.title)}</div>
@@ -811,7 +811,7 @@ function createUrlCard(u){
       <div class="file-meta" style="word-break:break-all">${escapeHtml(u.url)}</div>
       <div class="file-actions">
         <button class="btn btn-tiny btn-view" onclick="window.open('/api/url/${u.id}','_blank')">Open</button>
-        ${isAdmin ? `<button class="btn btn-tiny btn-danger" onclick="openDeleteUrlModal('${u.id}','${escapeAttr(u.title)}')">Delete</button>` : ''}
+        ${isOwner ? `<button class="btn btn-tiny btn-danger" onclick="openDeleteUrlModal('${u.id}','${escapeAttr(u.title)}')">Delete</button>` : ''}
       </div>
     </div>`;
 }
@@ -843,6 +843,9 @@ async function viewFile(fileId, filename){
     if(!res.ok) throw new Error('fetch failed');
     const blob = await res.blob();
     const blobUrl = URL.createObjectURL(blob); blobUrls.push(blobUrl);
+    if(imageExts.includes(ext) || ext === 'pdf'){
+      openChatForFile(blob, filename);
+    }
     if(imageExts.includes(ext)){
       viewer.innerHTML = ''; const img = document.createElement('img'); img.src = blobUrl; viewer.appendChild(img);
     } else if(ext === 'pdf'){
@@ -876,6 +879,7 @@ async function renderPDF(blobUrl, viewer){
 function closeViewModal(){
   document.getElementById('viewModal').classList.remove('active');
   blobUrls.forEach(u=>URL.revokeObjectURL(u)); blobUrls=[];
+  closeChatForFile();
 }
 function closeModal(id){ document.getElementById(id).classList.remove('active'); }
 
@@ -988,14 +992,39 @@ async function initSession(){
   }catch(e){ showAiError('Could not start assistant session'); }
 }
 
+async function openChatForFile(blob, filename){
+  try{
+    if(!sessionId) await initSession();
+    document.getElementById('messagesContainer').innerHTML = '';
+    document.getElementById('aiPanel').classList.add('show');
+    document.getElementById('aiFab').classList.add('hidden');
+    const file = new File([blob], filename, {type: blob.type || 'application/octet-stream'});
+    await uploadFilesSequentially([file], false);
+  }catch(e){ /* chat setup failing shouldn't block the file preview */ }
+}
+
+function closeChatForFile(){
+  document.getElementById('aiPanel').classList.remove('show');
+  document.getElementById('aiFab').classList.add('hidden');
+  if(sessionId){
+    fetch(`${API_URL}/api/history/clear`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({session_id: sessionId}) }).catch(()=>{});
+  }
+  sessionId = null; totalPages = 0; currentPageIndex = 0; lastBotResponse = '';
+  document.getElementById('messagesContainer').innerHTML = `<div class="ai-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h4 style="font-size:13.5px;margin-bottom:4px">Ready to help</h4><p style="font-size:12px">Open a file to ask questions about it.</p></div>`;
+  document.getElementById('queryInput').disabled = true;
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('speakerBtn').disabled = true;
+  document.getElementById('fileInfo').classList.remove('show');
+  document.getElementById('pageNav').classList.remove('show');
+}
+
 document.getElementById('aiFab').addEventListener('click', ()=>{
   document.getElementById('aiPanel').classList.add('show');
   document.getElementById('aiFab').classList.add('hidden');
   if(!sessionId) initSession();
 });
 document.getElementById('aiCloseBtn').addEventListener('click', ()=>{
-  document.getElementById('aiPanel').classList.remove('show');
-  document.getElementById('aiFab').classList.remove('hidden');
+  closeChatForFile();
 });
 
 document.getElementById('fileInput').addEventListener('change', async (e)=>{
